@@ -1,4 +1,6 @@
-# CytoQP: Cytof Quality Pipeline
+# CytoQP
+Cytof Quality Pipeline
+
 ## Introduction
 The CytoQP package provide a workflow for data preprocessing. The preprocessing tools include: bead-based normalization; 
 flow rate and signal cleaning; files quality check; debracoding; files deconvolution and aggregation; gating of singlets, 
