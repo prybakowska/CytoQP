@@ -1,12 +1,55 @@
 Package: CytoQP
-Title: What the Package Does (One Line, Title Case)
+Title: Cytometry data quality control and cleaninig
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R: c(
+    person("Paulina", "Rybakowska", , "paulina.rybakowska@genyo.es", role = c("aut", "cre")),
+    person("Sofie", "Van Gassen", , "sofie.vangassen@ugent.be", role = "aut"),
+    person("Jordi", "Martorell Marugán", , "jordi.martorell@genyo.es", role = "aut"),
+    person("Katrien", "Quintelier", , "katrienL.Quintelier@ugent.be", role = "aut"),
+    person("Yvan", "Saeys", , "yvan.saeys@ugent.be", role = "aut"),
+    person("Marta E", "Alarcón-Riquelme", , "marta.alarcon@genyo.es", role = "aut"),
+    person("Concepción", "Marañón", , "concepcion.maranon@genyo.es", role = "aut")
+  )
+Description: CytoQP (Quality Pipeline) offers a pipeline to pre-process
+    cytometry data, especially the one acquired on CyTOF/HELIOS
+    instruments.  It joins all together tools necessary to perform
+    bead-based normalization, flow rate and signal cleaning, quality
+    control of the files, debarcoding, aggregation and deconvolution,
+    gating and normalization using REF samples.  It also extract verifies
+    batch effect and extract features like cell frequencies and median
+    signal intensities.
+License: use_gpl_license(version = 2, include_future = TRUE)
+Import: 
+  "BiocParallel",
+  "CATALYST",
+  "CytoNorm",
+  "cytutils",
+  "dplyr",
+  "flowCore",
+  "flowCut",
+  "flowDensity",
+  "FlowSOM",
+  "ggplot2",
+  "ggpubr",
+  "graphics",
+  "grDevices",
+  "grid",
+  "gridExtra",
+  "pheatmap",
+  "RColorBrewer",
+  "S4Vectors",
+  "stats",
+  "stringr",
+  "SummarizedExperiment",
+  "utils",                
+  "uwot"
+Depends: 
+    R (>= 4.0)
 Encoding: UTF-8
+LazyData: true
+biocViews: Mass cytometry, Flow cytometry, Large scale studies, Quality control, 
+  Data preprocessing, Data cleaning
+URL: https://github.com/prybakowska/CytoQP
+BugReports: https://github.com/prybakowska/CytoQP/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
