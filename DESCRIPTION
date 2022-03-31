@@ -42,7 +42,7 @@ Imports:
   utils,                
   uwot
 Remotes:
-  saeyslab/CytoNorm
+  saeyslab/CytoNorm,
   ismmshimc/cytutils
 Depends: 
     R (>= 4.0)
