@@ -22,8 +22,6 @@ License: GPL (>= 2)
 Imports: 
   BiocParallel,
   CATALYST,
-  CytoNorm,
-  cytutils,
   dplyr,
   flowCore,
   flowCut,
@@ -43,6 +41,9 @@ Imports:
   SummarizedExperiment,
   utils,                
   uwot
+Remotes:
+  saeyslab/CytoNorm
+  ismmshimc/cytutils
 Depends: 
     R (>= 4.0)
 Encoding: UTF-8
