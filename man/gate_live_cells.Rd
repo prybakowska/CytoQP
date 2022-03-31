@@ -76,7 +76,8 @@ if(!dir.exists(gate_dir)){dir.create(gate_dir)}
 # Gate the files and plot the gating strategy for each file
 n_plots <- 1
 png(file.path(gate_dir, paste0("gating.png")),
-    width = n_plots * 300, height = length(files) * 300)
+width = n_plots * 300,
+height = length(files) * 300)
 layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
 
 for (file in files){
@@ -90,6 +91,5 @@ for (file in files){
 }
 
 dev.off()
-
 
 }

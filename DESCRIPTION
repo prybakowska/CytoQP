@@ -18,31 +18,31 @@ Description: CytoQP (Quality Pipeline) offers a pipeline to pre-process
     gating and normalization using REF samples.  It also extract verifies
     batch effect and extract features like cell frequencies and median
     signal intensities.
-License: use_gpl_license(version = 2, include_future = TRUE)
-Import: 
-  "BiocParallel",
-  "CATALYST",
-  "CytoNorm",
-  "cytutils",
-  "dplyr",
-  "flowCore",
-  "flowCut",
-  "flowDensity",
-  "FlowSOM",
-  "ggplot2",
-  "ggpubr",
-  "graphics",
-  "grDevices",
-  "grid",
-  "gridExtra",
-  "pheatmap",
-  "RColorBrewer",
-  "S4Vectors",
-  "stats",
-  "stringr",
-  "SummarizedExperiment",
-  "utils",                
-  "uwot"
+License: GPL (>= 2)
+Imports: 
+  BiocParallel,
+  CATALYST,
+  CytoNorm,
+  cytutils,
+  dplyr,
+  flowCore,
+  flowCut,
+  flowDensity,
+  FlowSOM,
+  ggplot2,
+  ggpubr,
+  graphics,
+  grDevices,
+  grid,
+  gridExtra,
+  pheatmap,
+  RColorBrewer,
+  S4Vectors,
+  stats,
+  stringr,
+  SummarizedExperiment,
+  utils,                
+  uwot
 Depends: 
     R (>= 4.0)
 Encoding: UTF-8

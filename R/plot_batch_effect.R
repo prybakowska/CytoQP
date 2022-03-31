@@ -55,6 +55,8 @@
 #'            clustering_markers = c("CD", "IgD", "HLA"),
 #'            manual_colors = c("darkorchid4", "darkorange", "chartreuse4"))
 #'
+#' @export
+#'
 #' @return save plots for batch effect in the out_dir
 
 plot_batch <- function(files_before_norm,
@@ -558,6 +560,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
 #'                width = 22,
 #'                height = 14, dpi = 300)
 #'
+#' @export
 prepare_data_for_plotting <- function(frequency_msi_list,
                                       matrix_type,
                                       n_neighbours = 15,

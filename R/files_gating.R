@@ -58,6 +58,8 @@
 #'
 #'dev.off()
 #'
+#' @export
+#'
 #' @return An untransformed flow frame with intact cells only
 gate_intact_cells <- function(flow_frame,
                               file_name = NULL,
@@ -191,6 +193,8 @@ gate_intact_cells <- function(flow_frame,
 #'
 #'dev.off()
 #'
+#' @export
+#'
 #' @return An untransformed flow frame with singlets only
 gate_singlet_cells <- function(flow_frame,
                                file_name = NULL,
@@ -290,7 +294,8 @@ gate_singlet_cells <- function(flow_frame,
 #' # Gate the files and plot the gating strategy for each file
 #' n_plots <- 1
 #' png(file.path(gate_dir, paste0("gating.png")),
-#'     width = n_plots * 300, height = length(files) * 300)
+#' width = n_plots * 300,
+#' height = length(files) * 300)
 #' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
 #'
 #' for (file in files){
@@ -305,6 +310,7 @@ gate_singlet_cells <- function(flow_frame,
 #'
 #'dev.off()
 #'
+#' @export
 #'
 #' @return An untransformed flow frame with live cells only
 gate_live_cells <- function(flow_frame,

@@ -428,7 +428,113 @@ clean_files <- function(files,
   return(xgraph)
 }
 
+.clean_signal_ind <- function(flow_frame,
+                              channels_to_clean = NULL,
+                              to_plot = "All",
+                              Segment = 1000,
+                              out_dir = getwd(),
+                              arcsine_transform = TRUE,
+                              non_used_bead_ch = NULL,
+                              MaxPercCut = 0.5,
+                              UseOnlyWorstChannels = TRUE,
+                              AllowFlaggedRerun = TRUE,
+                              AlwaysClean = TRUE,
+                              data_type = "MC",
+                              ...){
 
+  channels_to_transform <- find_mass_ch(flow_frame, value = FALSE)
+
+  if (arcsine_transform){
+
+    if(data_type == "MC"){
+      ff_t <- flowCore::transform(flow_frame,
+                                  flowCore::transformList(flowCore::colnames(flow_frame)[channels_to_transform],
+                                                          CytoNorm::cytofTransform))
+    }
+    else if (data_type == "FC"){
+      ff_t <- flowCore::transform(flow_frame,
+                                  flowCore::transformList(flowCore::colnames(flow_frame)[channels_to_transform],
+                                                          flowCore::arcsinhTransform(a = 0, b = 1/150, c = 0)))
+
+    }
+    else {
+      stop("specify data type MC or FC")
+    }
+
+  }
+  else {
+    ff_t <- flow_frame
+  }
+
+  if (!is.null(channels_to_clean)){
+
+    ch_to_clean <- which(flowCore::colnames(flow_frame) %in% channels_to_clean)
+
+    if(!("TIME" %in% toupper(flowCore::colnames(flow_frame)[ch_to_clean]))){
+      ind_Time <- grep("TIME", toupper(flowCore::colnames(flow_frame)))
+      channels <- unique(sort(c(ch_to_clean, ind_Time)))
+    }
+
+  }
+  else {
+
+    if (!is.null(non_used_bead_ch)) {
+      non_bead_ch <- "140"
+    }
+    else {
+      non_bead_ch <- paste(non_used_bead_ch, collapse="|")
+    }
+
+    ind_Time <- grep("TIME", flowCore::colnames(flow_frame), value = T, ignore.case = T)
+    ch_to_clean <- c(ind_Time, find_mass_ch(flow_frame, value = TRUE))
+    ind_nonbeads <- grep(non_bead_ch, flowCore::colnames(flow_frame), value = TRUE)
+    channels <- ch_to_clean[!(ch_to_clean %in% ind_nonbeads)]
+    channels <- grep(paste(channels, collapse = "|"), flowCore::colnames(flow_frame))
+  }
+
+  out_dir <- file.path(out_dir, "SignalCleaning")
+  if(!dir.exists(out_dir)){
+    dir.create(out_dir)
+  }
+
+  cleaned_data <- flowCut::flowCut(f = ff_t,
+                                   Segment = Segment,
+                                   MaxPercCut = MaxPercCut,
+                                   Channels = channels,
+                                   FileID = gsub("_beadNorm", "_flowCutCleaned",
+                                                 basename(flow_frame@description$FILENAME)),
+                                   Plot = to_plot,
+                                   Directory = out_dir,
+                                   UseOnlyWorstChannels = UseOnlyWorstChannels,
+                                   AllowFlaggedRerun = AllowFlaggedRerun,
+                                   AlwaysClean = AlwaysClean)
+
+  ff_t_clean <- cleaned_data$frame
+
+  if (arcsine_transform){
+
+    if(data_type == "MC"){
+      ff_clean <- flowCore::transform(ff_t_clean,
+                                      flowCore::transformList(flowCore::colnames(ff_t_clean)[channels_to_transform],
+                                                              CytoNorm::cytofTransform.reverse))
+    }
+    else if (data_type == "FC"){
+      ff_clean <- flowCore::transform(ff_t_clean,
+                                      flowCore::transformList(flowCore::colnames(ff_t_clean)[channels_to_transform],
+                                                              CytoNorm::cytofTransform.reverse(x = 150)))
+
+    }
+    else {
+      stop("specify data type MC or FC")
+    }
+
+  }
+  else {
+    ff_clean <- ff_t_clean
+  }
+
+  return(ff_clean)
+}
 
 #' @references this code uses internal functions from flowAI package
 #' Monaco, G., Chen, H., Poidinger, M., Chen, J., de Magalhães, J.P.,
@@ -857,113 +963,7 @@ clean_files <- function(files,
 }
 
 
-.clean_signal_ind <- function(flow_frame,
-                              channels_to_clean = NULL,
-                              to_plot = "All",
-                              Segment = 1000,
-                              out_dir = getwd(),
-                              arcsine_transform = TRUE,
-                              non_used_bead_ch = NULL,
-                              MaxPercCut = 0.5,
-                              UseOnlyWorstChannels = TRUE,
-                              AllowFlaggedRerun = TRUE,
-                              AlwaysClean = TRUE,
-                              data_type = "MC",
-                              ...){
 
-  channels_to_transform <- find_mass_ch(flow_frame, value = FALSE)
-
-  if (arcsine_transform){
-
-    if(data_type == "MC"){
-      ff_t <- flowCore::transform(flow_frame,
-                                  flowCore::transformList(flowCore::colnames(flow_frame)[channels_to_transform],
-                                                          CytoNorm::cytofTransform))
-    }
-    else if (data_type == "FC"){
-      ff_t <- flowCore::transform(flow_frame,
-                                  flowCore::transformList(flowCore::colnames(flow_frame)[channels_to_transform],
-                                                          flowCore::arcsinhTransform(a = 0, b = 1/150, c = 0)))
-
-    }
-    else {
-      stop("specify data type MC or FC")
-    }
-
-  }
-  else {
-    ff_t <- flow_frame
-  }
-
-  if (!is.null(channels_to_clean)){
-
-    ch_to_clean <- which(flowCore::colnames(flow_frame) %in% channels_to_clean)
-
-    if(!("TIME" %in% toupper(flowCore::colnames(flow_frame)[ch_to_clean]))){
-      ind_Time <- grep("TIME", toupper(flowCore::colnames(flow_frame)))
-      channels <- unique(sort(c(ch_to_clean, ind_Time)))
-    }
-
-  }
-  else {
-
-    if (!is.null(non_used_bead_ch)) {
-      non_bead_ch <- "140"
-    }
-    else {
-      non_bead_ch <- paste(non_used_bead_ch, collapse="|")
-    }
-
-    ind_Time <- grep("TIME", flowCore::colnames(flow_frame), value = T, ignore.case = T)
-    ch_to_clean <- c(ind_Time, find_mass_ch(flow_frame, value = TRUE))
-    ind_nonbeads <- grep(non_bead_ch, flowCore::colnames(flow_frame), value = TRUE)
-    channels <- ch_to_clean[!(ch_to_clean %in% ind_nonbeads)]
-    channels <- grep(paste(channels, collapse = "|"), flowCore::colnames(flow_frame))
-  }
-
-  out_dir <- file.path(out_dir, "SignalCleaning")
-  if(!dir.exists(out_dir)){
-    dir.create(out_dir)
-  }
-
-  cleaned_data <- flowCut::flowCut(f = ff_t,
-                                   Segment = Segment,
-                                   MaxPercCut = MaxPercCut,
-                                   Channels = channels,
-                                   FileID = gsub("_beadNorm", "_flowCutCleaned",
-                                                 basename(flow_frame@description$FILENAME)),
-                                   Plot = to_plot,
-                                   Directory = out_dir,
-                                   UseOnlyWorstChannels = UseOnlyWorstChannels,
-                                   AllowFlaggedRerun = AllowFlaggedRerun,
-                                   AlwaysClean = AlwaysClean)
-
-  ff_t_clean <- cleaned_data$frame
-
-  if (arcsine_transform){
-
-    if(data_type == "MC"){
-      ff_clean <- flowCore::transform(ff_t_clean,
-                                      flowCore::transformList(flowCore::colnames(ff_t_clean)[channels_to_transform],
-                                                              CytoNorm::cytofTransform.reverse))
-    }
-    else if (data_type == "FC"){
-      ff_clean <- flowCore::transform(ff_t_clean,
-                                      flowCore::transformList(flowCore::colnames(ff_t_clean)[channels_to_transform],
-                                                              CytoNorm::cytofTransform.reverse(x = 150)))
-
-    }
-    else {
-      stop("specify data type MC or FC")
-    }
-
-  }
-  else {
-    ff_clean <- ff_t_clean
-  }
-
-  return(ff_clean)
-}
 
 
 

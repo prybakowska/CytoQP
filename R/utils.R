@@ -20,6 +20,17 @@ find_mass_ch <- function(flow_frame,
 }
 
 
+#' Tests the order of the files
+#'
+#' @param x the name of the file 1 (after removing uncommon prefix/sufix)
+#' @param y the name of the file 2 (after removing uncommon prefix/sufix)
+#'
+#' @return warrning if he files are not in order
+#' @export
+#'
+#' @examples
+#' test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
+#' basename(files_before_norm))
 test_match_order <- function(x,y) {
 
   if (isTRUE(all.equal(x,y))) print('Files are ordered')
