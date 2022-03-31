@@ -1,5 +1,5 @@
 # CytoQP
-Cytof Quality Pipeline
+Cyto Quality Pipeline
 
 ## Introduction
 The CytoQP package provide a workflow for data preprocessing. The preprocessing tools include: bead-based normalization; 
@@ -12,4 +12,4 @@ This pipeline is designed for blood samples with multibatch and large scale stud
 ## Installation
 You can install this package using the devtools library.
 
-devtools::install_github(prybakowska/CytoQP)
+devtools::install_github("prybakowska/CytoQP")
