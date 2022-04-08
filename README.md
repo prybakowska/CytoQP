@@ -13,6 +13,7 @@ This pipeline is designed for blood samples with multibatch and large scale stud
 You can install this package using the devtools library.
 
 install.packages("devtools")
+
 library(devtools)
 
 devtools::install_github("prybakowska/CytoQP")
