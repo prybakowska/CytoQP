@@ -14,4 +14,5 @@ You can install this package using the devtools library.
 
 install.packages("devtools")
 library(devtools)
+
 devtools::install_github("prybakowska/CytoQP")
