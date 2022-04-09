@@ -706,40 +706,30 @@ plot_batch_using_freq_msi <- function(df_plot,
                                       shape_legend_name = NULL,
                                       title = NULL){
 
-  if(split_by_normalization){
+  if (split_by_normalization) {
     df_plot$normalization <- factor(df_plot$normalization,
                                     levels = c("Raw", "Normalized"))
-    p <- ggplot(df_plot, aes(x = dim1, y = dim2))+
-      geom_point(data=df_plot, aes(x=dim1, y=dim2, fill = fill,
-                                   shape = shape, color = color),
-                 size = 3)+
-      ggtitle(title) +
+    p <- ggplot(df_plot, aes(x = dim1, y = dim2)) + geom_point(data = df_plot,
+                                                               aes(x = dim1, y = dim2, fill = fill, shape = shape,
+                                                                   color = color), size = 3) + ggtitle(title) +
+      scale_color_manual(values = manual_colors)+
       facet_wrap(~normalization)
-
-  } else {
-    p <- ggplot(df_plot, aes(x = dim1, y = dim2))+
-      geom_point(data=df_plot, aes(x=dim1, y=dim2, fill = fill,
-                                   shape = shape, color = color),
-                 size = 3)+
-      ggtitle(title)
   }
-
-  p <- p + theme(panel.background = element_rect(fill = "white", colour = "black",
-                                                 size = 1, linetype = "solid"),
+  else {
+    p <- ggplot(df_plot, aes(x = dim1, y = dim2)) +
+      geom_point(data = df_plot,
+                 aes(x = dim1, y = dim2, fill = fill, shape = shape,
+                     color = color), size = 3) + ggtitle(title)+
+      scale_color_manual(values = manual_colors)
+  }
+  p <- p + theme(panel.background = element_rect(fill = "white",
+                                                 colour = "black", size = 1, linetype = "solid"),
                  panel.grid.major = element_blank(),
-                 panel.grid.minor = element_blank(),
-                 # axis.text = element_blank(),
-                 # axis.ticks = element_blank(),
-                 # axis.title.y = element_blank(),
-                 # axis.title.x = element_blank(),
-                 legend.position = "right",
-                 legend.key=element_blank(),
-                 # title = element_text(size = 10),
-                 #strip.text = element_blank(),
-                 strip.background = element_rect(fill = "white", colour = "black"))
-
-
-  p <- p + labs(fill = fill_legend_name, color = color_legend_name, shape = shape_legend_name)
+                 panel.grid.minor = element_blank(), legend.position = "right",
+                 legend.key = element_blank(), strip.background = element_rect(fill = "white",
+                                                                               colour = "black"))
+  p <- p + labs(fill = fill_legend_name, color = color_legend_name,
+                shape = shape_legend_name)
   return(p)
 }
 

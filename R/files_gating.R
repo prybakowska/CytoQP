@@ -479,11 +479,11 @@ gate_live_cells <- function(flow_frame,
                           ...)
     if(length(channels) == 2) {
       graphics::points(flow_frame@exprs[!selection, channels], col = "red", pch = ".")
-      graphics::abline(v = boundaries[c("l_lim", "u_lim"), channels[1]], col = "grey")
-      graphics::abline(h = boundaries[c("l_lim", "u_lim"), channels[2]], col = "grey")
+      graphics::abline(v = boundaries[c("l_lim", "u_lim"), channels[1]], col = "black")
+      graphics::abline(h = boundaries[c("l_lim", "u_lim"), channels[2]], col = "black")
     } else if(length(channels) == 1) {
       graphics::points(flow_frame@exprs[!selection, c(channels, "Ir191Di")], pch = ".")
-      graphics::abline(v = boundaries[c("l_lim", "u_lim"), channels[1]], col = "grey")
+      graphics::abline(v = boundaries[c("l_lim", "u_lim"), channels[1]], col = "black")
     }
   }
 
