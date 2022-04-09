@@ -629,6 +629,8 @@ prepare_data_for_plotting <- function(frequency_msi_list,
 #' @param color_legend_name Character, specifies the name of the legend for fill.
 #' @param shape_legend_name Character, specifies the name of the legend for fill.
 #' @param title Character, the title of the plot.
+#' @param manual_colors Character, vector of the colors to be used,
+#' the number of colors needs to be equal to the length of batch_pattern.
 #'
 #' @return ggplot
 #' @export
@@ -704,7 +706,8 @@ plot_batch_using_freq_msi <- function(df_plot,
                                       fill_legend_name = NULL,
                                       color_legend_name = NULL,
                                       shape_legend_name = NULL,
-                                      title = NULL){
+                                      title = NULL,
+                                      manual_colors = NULL){
 
   if (split_by_normalization) {
     df_plot$normalization <- factor(df_plot$normalization,
