@@ -715,15 +715,19 @@ plot_batch_using_freq_msi <- function(df_plot,
     p <- ggplot(df_plot, aes(x = dim1, y = dim2)) + geom_point(data = df_plot,
                                                                aes(x = dim1, y = dim2, fill = fill, shape = shape,
                                                                    color = color), size = 3) + ggtitle(title) +
-      scale_color_manual(values = manual_colors)+
       facet_wrap(~normalization)
+    if(!is.NULL(manual_colors)){
+      p <- p + scale_color_manual(values = manual_colors)
+    }
   }
   else {
     p <- ggplot(df_plot, aes(x = dim1, y = dim2)) +
       geom_point(data = df_plot,
                  aes(x = dim1, y = dim2, fill = fill, shape = shape,
-                     color = color), size = 3) + ggtitle(title)+
-      scale_color_manual(values = manual_colors)
+                     color = color), size = 3) + ggtitle(title)
+    if(!is.NULL(manual_colors)){
+      p <- p + scale_color_manual(values = manual_colors)
+    }
   }
   p <- p + theme(panel.background = element_rect(fill = "white",
                                                  colour = "black", size = 1, linetype = "solid"),
