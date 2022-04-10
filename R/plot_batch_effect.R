@@ -716,7 +716,7 @@ plot_batch_using_freq_msi <- function(df_plot,
                                                                aes(x = dim1, y = dim2, fill = fill, shape = shape,
                                                                    color = color), size = 3) + ggtitle(title) +
       facet_wrap(~normalization)
-    if(!is.NULL(manual_colors)){
+    if(!is.null(manual_colors)){
       p <- p + scale_color_manual(values = manual_colors)
     }
   }
@@ -725,7 +725,7 @@ plot_batch_using_freq_msi <- function(df_plot,
       geom_point(data = df_plot,
                  aes(x = dim1, y = dim2, fill = fill, shape = shape,
                      color = color), size = 3) + ggtitle(title)
-    if(!is.NULL(manual_colors)){
+    if(!is.null(manual_colors)){
       p <- p + scale_color_manual(values = manual_colors)
     }
   }
