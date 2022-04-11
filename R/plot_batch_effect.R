@@ -337,7 +337,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
   res <- list()
   for (f in names(file_list)){
 
-    nCells <- length(file_list[[f]]) * 50000
+    nCells <- length(file_list[[f]]) * nCells
     print(paste("aggregating files for", f, "normalization"))
     ff_agg <- FlowSOM::AggregateFlowFrames(fileNames = file_list[[f]],
                                            cTotal = nCells,
