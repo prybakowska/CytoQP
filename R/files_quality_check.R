@@ -8,8 +8,9 @@
 #'
 #' @param fcs_files Character, full path to fcs files.
 #' @param file_batch_id Character vector with batch label for each fcs_file,
-#' the order and the length needs to be the same as in fcs_files. if only batch
+#' the order and the length needs to be the same as in fcs_files. If only batch
 #' is processed can be prepared as e.g. file_batch_id <- rep("batch", length(files))
+#' or left at default NULL.
 #' @param out_dir Character, pathway to where the plots should be saved,
 #' default is set to NULL, which means that the following path will be created
 #' file.path(getwd(), "Quality_Control").
@@ -109,7 +110,7 @@ file_quality_check <- function(fcs_files,
                      phenotyping_markers = phenotyping_markers,
                      out_dir = out_dir, arcsine_transform = arcsine_transform,
                      nClus = nClus,
-                     batch = NULL)
+                     batch = NULL, ...)
 
     scores <- aof_scoring(fcs_files = files,
                           phenotyping_markers = phenotyping_markers,
@@ -144,7 +145,7 @@ file_quality_check <- function(fcs_files,
 #' This name is passed to FlowSOM plot name, default is set to NULL
 #' @param arcsine_transform Logical, if the data should be transformed with
 #' arcsine transformation and cofactor 5. Default set to TRUE.
-#' @param seed numeric, set to obtain reproducible results, default 1.
+#' @param seed numeric, set to obtain reproducible results, default set to NULL.
 #' @param transform_list Transformation list to pass to the flowCore
 #' transform function see flowCore::transformList.
 #' @param my_colors An array specifying colors to be used for the background
@@ -168,7 +169,7 @@ fsom_aof <- function(fcs_files,
                      arcsine_transform = TRUE,
                      transform_list = NULL,
                      my_colors = NULL,
-                     seed = 1,
+                     seed = NULL,
                      to_plot = TRUE){
 
 

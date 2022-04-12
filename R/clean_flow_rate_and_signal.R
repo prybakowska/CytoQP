@@ -13,29 +13,31 @@
 #' @param clean_signal, Logical, if signal should be cleaned.
 #' @param out_dir Character, pathway to where the plots should be saved,
 #' only if argument to_plot = TRUE, default is set to file.path(getwd(), Cleaned).
-#' @param Alpha numeric, as in flowAI::flow_auto_qc. The statistical
+#' @param alpha numeric, as in flowAI::flow_auto_qc. The statistical
 #' significance level used to accept anomalies. The default value is 0.01.
+#' Applies to flow rate.
 #' @param data_type Character, if MC (mass cytometry) of FC (flow cytometry)
 #' data are analyzed.
 #' @param channels_to_clean Character vector of the channels that needs
-#' to be cleaned.
+#' to be cleaned.Applies to signal cleaning.
 #' @param Segment As in flowCut, an integer value that specifies the
 #' number of events in each segment to be analyzed.Default is 1000 events.
 #' @param arcsine_transform Logical, if the data should be transformed with
 #' arcsine transformation and cofactor 5, default is set to TRUE.
+#' Applies to signal cleaning.
 #' @param non_used_bead_ch Character vector, bead channels that does not contain
 #' any marker information, thus do not need to be cleaned and used
-#' for further analysis.
+#' for further analysis.Applies to signal cleaning.
 #' @param MaxPercCut As in flowCut, numeric between 0-1 the maximum percentage of
-#' event that will be removed form the data.
+#' event that will be removed form the data.Applies to signal cleaning.
 #' @param UseOnlyWorstChannels As in flowCut, logical, automated detection of the
-#' worst channel that will be used for cleaning.
+#' worst channel that will be used for cleaning.Applies to signal cleaning.
 #' @param AllowFlaggedRerun as in flowCut, logical, specify if flowCut will run
-#  second time in case the file was flagged.
+#  second time in case the file was flagged.Applies to signal cleaning.
 #' @param AlwaysClean as in flowCut, logical. The file will be cleaned even if
 #' it has a relatively stable signal. The segments that are 7 SD away
-#' from the mean of all segments are removed.
-#' @param ... Additional arguments to pass to flowcut.
+#' from the mean of all segments are removed.Applies to signal cleaning.
+#' @param ... Additional arguments to pass to flowcut.Applies to signal cleaning.
 #'
 #' @return Cleaned, untransformed flow frame if arcsine_transform argument
 #' set to TRUE, otherwise transformed flow frame is returned. Save plots
