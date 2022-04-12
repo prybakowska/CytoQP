@@ -8,9 +8,8 @@
 #'
 #' @param fcs_files Character, full path to fcs files.
 #' @param file_batch_id Character vector with batch label for each fcs_file,
-#' the order and the length needs to be the same as in fcs_files. If only batch
-#' is processed can be prepared as e.g. file_batch_id <- rep("batch", length(files))
-#' or left at default NULL.
+#' the order and the length needs to be the same as in fcs_files. If only one batch
+#' or one file is processed the parameter should be left as NULL (default).
 #' @param out_dir Character, pathway to where the plots should be saved,
 #' default is set to NULL, which means that the following path will be created
 #' file.path(getwd(), "Quality_Control").
