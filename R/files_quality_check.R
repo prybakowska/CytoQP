@@ -74,9 +74,12 @@ file_quality_check <- function(fcs_files,
     fcs_files <- unlist(fcs_files)
   }
 
-  if(length(file_batch_id) != length(fcs_files)){
-    stop("the lenght of the file_batch_id is not equal to the lenght of fcs_files")
+  if(!is.null(file_batch_id)){
+    if(length(file_batch_id) != length(fcs_files)){
+      stop("the lenght of the file_batch_id is not equal to the lenght of fcs_files")
+    }
   }
+
   # create out_dir if does not exist
   if(is.null(out_dir)){
     out_dir <- file.path(getwd(), "Quality_Control")
