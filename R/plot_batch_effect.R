@@ -447,6 +447,8 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
 
     }
 
+    rm(fsom)
+
     if(impute_0_values){
       cl_msi <- apply(cl_msi, 2,
                           function(x){
