@@ -448,10 +448,10 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
                                                                   metaclustering = fsom$metaclustering)))
       mcl_msi[file,] <- as.numeric(mcluster_mfis[,unique(names(c(phenotyping_channels,functional_channels)))])
 
+      rm(fsom_subset)
     }
 
     rm(fsom)
-    rm(fsom_subset)
 
     if(impute_0_values){
       cl_msi <- apply(cl_msi, 2,
@@ -483,6 +483,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
     }
 
     res[[f]] <- all_mx
+    gc()
   }
 
   if(save_matrix){
