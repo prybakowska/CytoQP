@@ -391,6 +391,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
                       width =24, height = 10)
 
       saveRDS(object = fsom, file = file.path(out_dir, paste0(f, "_flowsom.RDS")))
+      rm(figure)
     }
 
 
@@ -421,6 +422,8 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
                       ncol =  length(mfi_mc_names),
                       dimnames = list(basename(file_list[[f]]), mfi_mc_names))
 
+    rm(ff_aggt)
+
     print(paste("calculating frequency and msi for:", f, "normalization"))
 
     for (i in unique(fsom$data[,"File2"])){
@@ -448,6 +451,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
     }
 
     rm(fsom)
+    rm(fsom_subset)
 
     if(impute_0_values){
       cl_msi <- apply(cl_msi, 2,
