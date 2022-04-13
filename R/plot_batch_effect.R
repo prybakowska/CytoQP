@@ -356,7 +356,9 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
       ff_aggt <- ff_agg
     }
 
-    markers <- FlowSOM::GetMarkers(ff_agg, flowCore::colnames(ff_agg))
+    rm(ff_agg)
+
+    markers <- FlowSOM::GetMarkers(ff_aggt, flowCore::colnames(ff_aggt))
     phenotyping_channels <- grep(paste(phenotyping_markers,
                                        collapse = ("|")), markers, value = TRUE)
     functional_channels <- grep(paste(functional_markers,
@@ -402,11 +404,11 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
                         ncol = nClus,
                         dimnames = list(basename(file_list[[f]]), 1:nClus))
     mfi_cl_names <- apply(expand.grid(paste0("Cl", seq_len(fsom$map$nNodes)),
-                                      FlowSOM::GetMarkers(ff_agg,
+                                      FlowSOM::GetMarkers(ff_aggt,
                                                           unique(c(phenotyping_channels,functional_channels)))),
                           1, paste, collapse = "_")
     mfi_mc_names <- apply(expand.grid(paste0("MC", 1:nClus),
-                                      FlowSOM::GetMarkers(ff_agg,
+                                      FlowSOM::GetMarkers(ff_aggt,
                                                           unique(c(phenotyping_channels,functional_channels)))),
                           1, paste, collapse = "_")
     cl_msi <- matrix(NA,
