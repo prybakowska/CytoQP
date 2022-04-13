@@ -341,7 +341,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
     print(paste("aggregating files for", f, "normalization"))
     ff_agg <- FlowSOM::AggregateFlowFrames(fileNames = file_list[[f]],
                                            cTotal = nCells,
-                                           writeOutput = F,
+                                           writeOutput = FALSE,
                                            outputFile = file.path(out_dir, paste0(f, "_flowsom_agg.fcs")))
 
 
@@ -475,6 +475,12 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
                    "Metacluster_frequencies" = mcl_pctgs,
                    "Cluster_MSIs" = cl_msi,
                    "Metacluster_MSIs" = mcl_msi)
+
+    if(save_matrix){
+      saveRDS(object = all_mx,
+              file = file.path(out_dir,
+                               paste0(f, "_normalization_cell_frequency_and_msi_list_using_FlowSOM.RDS")))
+    }
 
     res[[f]] <- all_mx
   }
