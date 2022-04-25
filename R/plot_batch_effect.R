@@ -487,7 +487,8 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
   }
 
   if(save_matrix){
-    saveRDS(object = res, file = file.path(out_dir, "cell_frequency_and_msi_list_using_FlowSOM.RDS"))
+    saveRDS(object = res,
+            file = file.path(out_dir, "cell_frequency_and_msi_list_using_FlowSOM.RDS"))
   }
 
   return(res)

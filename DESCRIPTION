@@ -22,6 +22,8 @@ License: GPL (>= 2)
 Imports: 
   BiocParallel,
   CATALYST,
+  CytoNorm,
+  cytutils,
   dplyr,
   flowCore,
   flowCut,
