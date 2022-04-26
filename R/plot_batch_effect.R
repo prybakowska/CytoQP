@@ -683,13 +683,13 @@ extract_pctgs_msi_per_flowsom <- function(files,
 
   # Define matrices for frequency (pctgs) calculation and MSI (msi). These calculation is performed
   # for clusters (cl) and metaclusters (mcl)
-  cl_pctgs <- matrix(data = NA, nrow = length(file_list[[f]]),
+  cl_pctgs <- matrix(data = NA, nrow = length(files),
                      ncol = xdim * ydim,
-                     dimnames = list(basename(file_list[[f]]), 1:(xdim*ydim)))
+                     dimnames = list(basename(files), 1:(xdim*ydim)))
 
-  mcl_pctgs <- matrix(data = NA, nrow = length(file_list[[f]]),
+  mcl_pctgs <- matrix(data = NA, nrow = length(files),
                       ncol = nClus,
-                      dimnames = list(basename(file_list[[f]]), 1:nClus))
+                      dimnames = list(basename(files), 1:nClus))
   mfi_cl_names <- apply(expand.grid(paste0("Cl", seq_len(fsom$map$nNodes)),
                                     FlowSOM::GetMarkers(ff_agg,
                                                         unique(c(phenotyping_channels,functional_channels)))),
@@ -699,14 +699,14 @@ extract_pctgs_msi_per_flowsom <- function(files,
                                                         unique(c(phenotyping_channels,functional_channels)))),
                         1, paste, collapse = "_")
   cl_msi <- matrix(NA,
-                   nrow = length(file_list[[f]]),
+                   nrow = length(files),
                    ncol = fsom$map$nNodes * length(unique(names(c(phenotyping_channels,
                                                                   functional_channels)))),
-                   dimnames = list(basename(file_list[[f]]), mfi_cl_names))
+                   dimnames = list(basename(files), mfi_cl_names))
   mcl_msi <- matrix(NA,
-                    nrow = length(file_list[[f]]),
+                    nrow = length(files),
                     ncol =  length(mfi_mc_names),
-                    dimnames = list(basename(file_list[[f]]), mfi_mc_names))
+                    dimnames = list(basename(files), mfi_mc_names))
 
   rm(ff_agg)
 
