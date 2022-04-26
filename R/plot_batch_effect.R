@@ -623,7 +623,7 @@ extract_pctgs_msi_per_flowsom <- function(files,
     f <- paste0(file_name, "_")
   }
 
-  nCells <- length(files * nCells)
+  nCells <- length(files) * nCells
   print(paste("aggregating files for normalization"))
 
   ff_agg <- FlowSOM::AggregateFlowFrames(fileNames = files,
