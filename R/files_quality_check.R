@@ -18,6 +18,11 @@
 #' if available. Can be full marker name e.g. "CD45" or pattern "CD" if
 #' all CD-markers needs to be plotted. Default is set to NULL, thus all the mass
 #' channels will be used.
+#' @param markers_to_score Character vector, marker names to be used for
+#' flowsom clustering including DNA marker Iridium and viability staining
+#' if available. Can be full marker name e.g. "CD45" or pattern "CD" if
+#' all CD-markers needs to be plotted. Default is set to NULL, thus the aof scores
+#' will be calculated for the markers included in phenotyping_markers.
 #' @param arcsine_transform Logical, if the data should be transformed with
 #' arcsine transformation and cofactor 5. Default is set to TRUE.
 #' If FALSE, the transform list to pass to the flowCore transform function must
@@ -59,6 +64,7 @@ file_quality_check <- function(fcs_files,
                                file_batch_id = NULL,
                                out_dir = NULL,
                                phenotyping_markers = NULL,
+                               markers_to_score = NULL,
                                arcsine_transform = TRUE,
                                sd = 3,
                                nClus = 10,
@@ -102,6 +108,7 @@ file_quality_check <- function(fcs_files,
                        batch = batch, ...)
       return(aof_scoring(fcs_files = files,
                          phenotyping_markers = phenotyping_markers,
+                         markers_to_score = markers_to_score,
                          fsom = fsom, out_dir = out_dir, batch = batch))
     })
     names(scores) <- unique(file_batch_id)
@@ -116,6 +123,7 @@ file_quality_check <- function(fcs_files,
 
     scores <- aof_scoring(fcs_files = files,
                           phenotyping_markers = phenotyping_markers,
+                          markers_to_score = markers_to_score,
                           fsom = fsom, out_dir = out_dir, batch = NULL)
   }
 
@@ -285,6 +293,7 @@ fsom_aof <- function(fcs_files,
 #' @export
 aof_scoring <- function(fcs_files,
                         phenotyping_markers,
+                        markers_to_score,
                         fsom,
                         out_dir = NULL,
                         batch = NULL){
@@ -305,6 +314,16 @@ aof_scoring <- function(fcs_files,
                                                           phenotyping_channels)[2])]
     }
   }
+
+  if(!is.null(markers_to_score){
+    markers <- FlowSOM::GetMarkers(ff_tmp, flowCore::colnames(ff_tmp))
+    chanels_to_score <- grep(paste(markers_to_score,
+                                          collapse = ("|")), markers, value = TRUE)
+
+    phenotyping_channels <- unique(c(phenotyping_channels, chanels_to_score))
+
+
+  })
 
   aof_scores <- lapply(fcs_files, function(file) {
     print(paste("calculating AOF", file))
