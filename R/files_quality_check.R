@@ -315,7 +315,7 @@ aof_scoring <- function(fcs_files,
     }
   }
 
-  if(!is.null(markers_to_score){
+  if(!is.null(markers_to_score)){
     markers <- FlowSOM::GetMarkers(ff_tmp, flowCore::colnames(ff_tmp))
     chanels_to_score <- grep(paste(markers_to_score,
                                           collapse = ("|")), markers, value = TRUE)
@@ -323,7 +323,7 @@ aof_scoring <- function(fcs_files,
     phenotyping_channels <- unique(c(phenotyping_channels, chanels_to_score))
 
 
-  })
+  }
 
   aof_scores <- lapply(fcs_files, function(file) {
     print(paste("calculating AOF", file))
