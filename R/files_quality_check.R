@@ -322,7 +322,7 @@ aof_scoring <- function(fcs_files,
 
     vector <- c(phenotyping_channels, chanels_to_score)
     phenotyping_channels <- vector[!duplicated(names(vector))]
-
+    phenotyping_markers <- unique(c(phenotyping_markers, markers_to_score))
 
   }
 
