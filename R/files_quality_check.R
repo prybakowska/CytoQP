@@ -320,7 +320,8 @@ aof_scoring <- function(fcs_files,
     chanels_to_score <- grep(paste(markers_to_score,
                                           collapse = ("|")), markers, value = TRUE)
 
-    phenotyping_channels <- unique(c(phenotyping_channels, chanels_to_score))
+    vector <- c(phenotyping_channels, chanels_to_score)
+    phenotyping_channels <- vector[!duplicated(names(vector))]
 
 
   }
