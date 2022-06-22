@@ -7,6 +7,7 @@
 fsom_aof(
   fcs_files,
   phenotyping_markers,
+  markers_to_score,
   nCells = length(fcs_files) * 10000,
   xdim = 10,
   ydim = 10,
@@ -16,7 +17,7 @@ fsom_aof(
   arcsine_transform = TRUE,
   transform_list = NULL,
   my_colors = NULL,
-  seed = 1,
+  seed = NULL,
   to_plot = TRUE
 )
 }
@@ -26,6 +27,12 @@ fsom_aof(
 \item{phenotyping_markers}{Character vector, marker names to be used for
 clustering, can be full marker name e.g. "CD45" or "CD" if all CD-markers
 needs to be plotted.}
+
+\item{markers_to_score}{Character vector, marker names to be used for
+flowsom clustering including DNA marker Iridium and viability staining
+if available. Can be full marker name e.g. "CD45" or pattern "CD" if
+all CD-markers needs to be plotted. Default is set to NULL, thus the aof scores
+will be calculated for the markers included in phenotyping_markers.}
 
 \item{nCells}{Numeric, the total number of cells, to use for FlowSOM clustering.
 This number is determined by total number of fcs files, as a default 10000 cells
@@ -55,7 +62,7 @@ transform function see flowCore::transformList.}
 coloring of metaclusters in FlowSOM and t-SNE plot. Must have a length equal
 to the nClus.If NULL (default) colors defined in FlowSOM package will be used.}
 
-\item{seed}{numeric, set to obtain reproducible results, default 1.}
+\item{seed}{numeric, set to obtain reproducible results, default set to NULL.}
 
 \item{to_plot}{Logical, if FlowSOM tree and t-SNE map should be plotted,
 default set to TRUE.}

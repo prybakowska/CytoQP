@@ -34,7 +34,7 @@ file_quality_check.Default set to NULL.}
 only if argument to_plot = TRUE, default is set to working directory}
 
 \item{min_threshold}{Logical, if the minimal threshold for barcoding
-should be applied.}
+should be applied.Default set to TRUE.}
 
 \item{threshold}{Numeric, value for the minimum threshold for debarcoding,
 default is set to 0.18, only if min_threshold set to TRUE.}

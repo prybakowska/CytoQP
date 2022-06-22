@@ -37,7 +37,7 @@ Only cells falling into intact cell region will be saved. Default set to FALSE.}
 \item{suffix}{Character, suffix placed in the name of saved fcs file, only
 if save_gated_flow_frame = TRUE. Default is "_singlets_gated".}
 
-\item{n_mad}{Numeric, number of MADs to detect outliers.}
+\item{n_mad}{Numeric, number of MADs to detect outliers.Default set to 2.}
 
 \item{out_dir}{Character, pathway to where the files should be saved,
 if NULL (default) files will be saved to file.path(getwd(), Gated).}

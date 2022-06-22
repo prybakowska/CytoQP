@@ -13,7 +13,8 @@ plot_batch_using_freq_msi(
   fill_legend_name = NULL,
   color_legend_name = NULL,
   shape_legend_name = NULL,
-  title = NULL
+  title = NULL,
+  manual_colors = NULL
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ points are colored.}
 \item{shape_legend_name}{Character, specifies the name of the legend for fill.}
 
 \item{title}{Character, the title of the plot.}
+
+\item{manual_colors}{Character, vector of the colors to be used,
+the number of colors needs to be equal to the length of batch_pattern.}
 
 \item{split_by_batch}{Logical, if TRUE (defult) the plots are split
 (facet_wrap) by normalization.}

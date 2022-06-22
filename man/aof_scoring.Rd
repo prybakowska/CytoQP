@@ -4,7 +4,14 @@
 \alias{aof_scoring}
 \title{Calculates AOF scores and scaled AOF scores}
 \usage{
-aof_scoring(fcs_files, phenotyping_markers, fsom, out_dir = NULL, batch = NULL)
+aof_scoring(
+  fcs_files,
+  phenotyping_markers,
+  markers_to_score,
+  fsom,
+  out_dir = NULL,
+  batch = NULL
+)
 }
 \arguments{
 \item{fcs_files}{Character, full path to fcs_files.}

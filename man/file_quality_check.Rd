@@ -9,6 +9,7 @@ file_quality_check(
   file_batch_id = NULL,
   out_dir = NULL,
   phenotyping_markers = NULL,
+  markers_to_score = NULL,
   arcsine_transform = TRUE,
   sd = 3,
   nClus = 10,
@@ -19,8 +20,8 @@ file_quality_check(
 \item{fcs_files}{Character, full path to fcs files.}
 
 \item{file_batch_id}{Character vector with batch label for each fcs_file,
-the order and the length needs to be the same as in fcs_files. if only batch
-is processed can be prepared as e.g. file_batch_id <- rep("batch", length(files))}
+the order and the length needs to be the same as in fcs_files. If only one batch
+or one file is processed the parameter should be left as NULL (default).}
 
 \item{out_dir}{Character, pathway to where the plots should be saved,
 default is set to NULL, which means that the following path will be created
@@ -31,6 +32,12 @@ flowsom clustering including DNA marker Iridium and viability staining
 if available. Can be full marker name e.g. "CD45" or pattern "CD" if
 all CD-markers needs to be plotted. Default is set to NULL, thus all the mass
 channels will be used.}
+
+\item{markers_to_score}{Character vector, marker names to be used for
+flowsom clustering including DNA marker Iridium and viability staining
+if available. Can be full marker name e.g. "CD45" or pattern "CD" if
+all CD-markers needs to be plotted. Default is set to NULL, thus the aof scores
+will be calculated for the markers included in phenotyping_markers.}
 
 \item{arcsine_transform}{Logical, if the data should be transformed with
 arcsine transformation and cofactor 5. Default is set to TRUE.

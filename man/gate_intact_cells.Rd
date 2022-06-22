@@ -27,16 +27,17 @@ the file name stored in keyword FIL will be used.}
 
 \item{tinypeak_removal_head}{Numeric from 0-1, as in deGate to exclude/include
 tiny peaks in the head of the density distribution curve for both Iridium
-channels.}
+channels. Default set to 0.8.}
 
 \item{tinypeak_removal_tail}{The same as tinypeak_removal1 but for the tail
-in the density distribution curve.}
+in the density distribution curve.Default set to 0.8.}
 
 \item{alpha_head}{Numeric, 0-1, as in deGate specify the significance of change
-in the slope being detected at the head of the density distribution curve.}
+in the slope being detected at the head of the density distribution curve.
+Default 0.05.}
 
-\item{alpha_tail}{The same as in alpha1 but for the tail of the density
-distribution curve.}
+\item{alpha_tail}{The same as in alpha_head but for the tail of the density
+distribution curve.Default 0.1.}
 
 \item{arcsine_transform}{Logical, if the data should be transformed
 with arcsine transformation and cofactor 5. If FALSE the data won't be

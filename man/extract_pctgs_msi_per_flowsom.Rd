@@ -2,11 +2,105 @@
 % Please edit documentation in R/plot_batch_effect.R
 \name{extract_pctgs_msi_per_flowsom}
 \alias{extract_pctgs_msi_per_flowsom}
-\title{Extracts percentages and MSI for cell populations}
+\title{#' Extracts percentages and MSI for cell populations
+#'
+#' @description Performs FlowSOM clustering and extracts cluster and metacluster
+#' frequency and MSI. It is imputing 0 values when NAs are detected in MSI for
+#' clusters and metaclusters.
+#'
+#' @param file_list List, pathway to the files before and after normalization
+#' @param nCells Numeric, number of cells to be cluster per each file,
+#' default is set to 50 000.
+#' @param phenotyping_markers Character vector, marker names to be used for clustering,
+#' can be full marker name e.g. "CD45" or "CD" if all CD-markers needs to be plotted.
+#' @param functional_markers Character vector, marker names to be used for
+#' functional markers, can be full marker name
+#' e.g. "IL-6" or "IL" if all IL-markers needs to be plotted.
+#' @param xdim Numeric, parameter to pass to FlowSOM, width of the SOM grid,
+#' default is set to 10.
+#' @param ydim Numeric, parameter to pass to FlowSOM, geight of the SOM grid,
+#' default is set to 10.
+#' @param n_metaclusters Numeric, exact number of clusters for metaclustering
+#' in FlowSOM, default is set to 35.
+#' @param out_dir Character, pathway to where the FlowSOM clustering plot should
+#' be saved, default is set to file.path(getwd(), "CytoNormed").
+#' @param seed Numeric, set to obtain reproducible results, default is set to NULL.
+#' @param arcsine_transform arcsine_transform Logical, if the data should
+#' be transformed with arcsine transformation and cofactor 5, default is set to TRUE
+#' @param save_matrix Logical, if the results should be saved, if TRUE (default)
+#' list of matrices will be saved in out_dir.
+#' @param transform_list Transformation list to pass to the flowCore
+#' transform function, see flowCore::transformList, if different transformation
+#' than arcsine is needed. Only if arcsine_transform is FALSE. If NULL and
+#' arcsine_transform = FALSE no transformation will be applied.Default set to NULL.
+#' @param save_flowsom_result Logical, if FlowSOM and FlowSOM plots should be
+#' saved. If TRUE (default) files will be saved in out_dir.
+#' @param impute_0_values Logical, if 0 values should be imputed for MSI values
+#' if NAs are present.
+#'
+#' @import ggplot2
+#'
+#' @examples
+#'
+#' # Define files before normalization
+#' gate_dir <- file.path(dir, "Gated")
+#' files_before_norm <- list.files(gate_dir,
+#'                                 pattern = ".fcs",
+#'                                 full.names = T)
+#'
+#' # Define files after normalization
+#' norm_dir <- file.path(dir, "CytoNormed")
+#' files_after_norm <- list.files(norm_dir,
+#'                                pattern = ".fcs",
+#'                                full.names = T)
+#'
+#' # files needs to be in the same order, check and order if needed
+#' test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
+#'                  basename(files_before_norm))
+#'
+#' batch_labels <- stringr::str_match(basename(files_before_norm), "day\link{0-9}*")\link{,1}
+#'
+#' mx <- extract_pctgs_msi_per_flowsom(files_after_norm = files_after_norm,
+#'                                     files_before_norm = files_before_norm,
+#'                                     nCells = 50000,
+#'                                     phenotyping_markers = c("CD", "HLA", "IgD"),
+#'                                     functional_markers = c("MIP", "MCP", "IL",
+#'                                                            "IFNa", "TNF", "TGF",
+#'                                                            "Gr"),
+#'                                     xdim = 10,
+#'                                     ydim = 10,
+#'                                     n_metaclusters = 35,
+#'                                     out_dir = norm_dir,
+#'                                     arcsine_transform = TRUE,
+#'                                     save_matrix = TRUE,
+#'                                     seed = 343)
+#'
+#' @return list of matrices that contain calculation for
+#' cl_pctgs (cluster percentages), mcl_pctgs (metaclusters percentages),
+#' cl_msi (cluster MSIs for selected markers), mcl_msi (metaclusters MSI
+#' for selected markers). If save_matrix = TRUE, saves this matrices in out_dir.
+#' FlowSOM objects for normalized and unnormalized data,
+#' if save_flowsom_result set to TRUE.
+#'
+#' @export
+extract_pctgs_msi_per_flowsom <- function(files_before_norm,
+files_after_norm,
+nCells = 50000,
+phenotyping_markers = c("CD", "HLA", "IgD"),
+functional_markers = NULL,
+xdim = 10,
+ydim = 10,
+n_metaclusters = 35,
+out_dir = NULL,
+seed = NULL,
+arcsine_transform = TRUE,
+save_matrix = TRUE,
+transform_list = NULL,
+save_flowsom_result = TRUE,
+impute_0_values = TRUE) {}
 \usage{
 extract_pctgs_msi_per_flowsom(
-  files_before_norm,
-  files_after_norm,
+  files,
   nCells = 50000,
   phenotyping_markers = c("CD", "HLA", "IgD"),
   functional_markers = NULL,
@@ -17,12 +111,15 @@ extract_pctgs_msi_per_flowsom(
   seed = NULL,
   arcsine_transform = TRUE,
   save_matrix = TRUE,
+  file_name = NULL,
   transform_list = NULL,
   save_flowsom_result = TRUE,
   impute_0_values = TRUE
 )
 }
 \arguments{
+\item{files}{Pathway to the files}
+
 \item{nCells}{Numeric, number of cells to be cluster per each file,
 default is set to 50 000.}
 
@@ -51,7 +148,11 @@ be saved, default is set to file.path(getwd(), "CytoNormed").}
 be transformed with arcsine transformation and cofactor 5, default is set to TRUE}
 
 \item{save_matrix}{Logical, if the results should be saved, if TRUE (default)
-list of matrices will be saved in out_dir.}
+matrice will be saved in out_dir.}
+
+\item{file_name}{The prefix/name to use for saving the either flowsom result
+or frequency matrix, only if save_matrix or save_flowsom_result set to TRUE.
+deafult NULL.}
 
 \item{transform_list}{Transformation list to pass to the flowCore
 transform function, see flowCore::transformList, if different transformation
@@ -63,14 +164,12 @@ saved. If TRUE (default) files will be saved in out_dir.}
 
 \item{impute_0_values}{Logical, if 0 values should be imputed for MSI values
 if NAs are present.}
-
-\item{file_list}{List, pathway to the files before and after normalization}
 }
 \value{
-list of matrices that contain calculation for
+matrix that contain calculation for
 cl_pctgs (cluster percentages), mcl_pctgs (metaclusters percentages),
 cl_msi (cluster MSIs for selected markers), mcl_msi (metaclusters MSI
-for selected markers). If save_matrix = TRUE, saves this matrices in out_dir.
+for selected markers). If save_matrix = TRUE, saves matrix in out_dir.
 FlowSOM objects for normalized and unnormalized data,
 if save_flowsom_result set to TRUE.
 }
@@ -79,19 +178,20 @@ Performs FlowSOM clustering and extracts cluster and metacluster
 frequency and MSI. It is imputing 0 values when NAs are detected in MSI for
 clusters and metaclusters.
 }
+\details{
+
+}
 \examples{
 
 # Define files before normalization
-gate_dir <- file.path(dir, "Gated")
-files_before_norm <- list.files(gate_dir,
-                                pattern = ".fcs",
-                                full.names = T)
+gate_dir <- file.path(getwd(), "Gated")
+files_before_norm <- list.files(gate_dir,pattern = ".fcs",
+                              full.names = TRUE)
 
 # Define files after normalization
-norm_dir <- file.path(dir, "CytoNormed")
-files_after_norm <- list.files(norm_dir,
-                               pattern = ".fcs",
-                               full.names = T)
+norm_dir <- file.path(getwd(), "CytoNormed")
+files_after_norm <- list.files(norm_dir, pattern = ".fcs",
+                              full.names = TRUE)
 
 # files needs to be in the same order, check and order if needed
 test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
@@ -99,19 +199,33 @@ test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
 
 batch_labels <- stringr::str_match(basename(files_before_norm), "day[0-9]*")[,1]
 
-mx <- extract_pctgs_msi_per_flowsom(files_after_norm = files_after_norm,
-                                    files_before_norm = files_before_norm,
-                                    nCells = 50000,
-                                    phenotyping_markers = c("CD", "HLA", "IgD"),
-                                    functional_markers = c("MIP", "MCP", "IL",
-                                                           "IFNa", "TNF", "TGF",
-                                                           "Gr"),
-                                    xdim = 10,
-                                    ydim = 10,
-                                    n_metaclusters = 35,
-                                    out_dir = norm_dir,
-                                    arcsine_transform = TRUE,
-                                    save_matrix = TRUE,
-                                    seed = 343)
+# Extract cell frequency and MSI
+
+files_list <- list("after" = files_after_norm,
+                   "before" = files_before_norm)
+
+results <- list()
+for (name in names(files_list)){
+
+files <- files_list[[name]]
+mx <- extract_pctgs_msi_per_flowsom(files = files,
+                                     nCells = 50000,
+                                     phenotyping_markers =
+                                       c("CD", "HLA", "IgD"),
+                                     functional_markers =
+                                       c("MIP", "MCP", "IL",
+                                         "IFNa", "TNF", "TGF",
+                                         "Gr"),
+                                     xdim = 10, ydim = 10,
+                                     n_metaclusters = 35,
+                                     out_dir = norm_dir,
+                                     arcsine_transform = TRUE,
+                                     save_matrix = TRUE,
+                                     file_name = name,
+                                     seed = 343,
+                                     impute_0_values = TRUE)
+results[[name]] <- mx
+
+}
 
 }

@@ -102,6 +102,7 @@ file_quality_check <- function(fcs_files,
       files <- fcs_files[file_batch_id == batch]
       fsom <- fsom_aof(fcs_files = files,
                        phenotyping_markers = phenotyping_markers,
+                       markers_to_score = markers_to_score,
                        out_dir = out_dir,
                        arcsine_transform = arcsine_transform,
                        nClus = nClus,
@@ -141,6 +142,11 @@ file_quality_check <- function(fcs_files,
 #' @param phenotyping_markers Character vector, marker names to be used for
 #' clustering, can be full marker name e.g. "CD45" or "CD" if all CD-markers
 #' needs to be plotted.
+#' @param markers_to_score Character vector, marker names to be used for
+#' flowsom clustering including DNA marker Iridium and viability staining
+#' if available. Can be full marker name e.g. "CD45" or pattern "CD" if
+#' all CD-markers needs to be plotted. Default is set to NULL, thus the aof scores
+#' will be calculated for the markers included in phenotyping_markers.
 #' @param nCells Numeric, the total number of cells, to use for FlowSOM clustering.
 #' This number is determined by total number of fcs files, as a default 10000 cells
 #' is used per file
@@ -170,6 +176,7 @@ file_quality_check <- function(fcs_files,
 #' @export
 fsom_aof <- function(fcs_files,
                      phenotyping_markers,
+                     markers_to_score,
                      nCells = length(fcs_files)*10000,
                      xdim = 10,
                      ydim = 10,
@@ -188,7 +195,20 @@ fsom_aof <- function(fcs_files,
     markers <- FlowSOM::GetMarkers(ff_tmp, flowCore::colnames(ff_tmp))
     phenotyping_channels <- grep(paste(phenotyping_markers,
                                        collapse = ("|")), markers, value = TRUE)
+    transform_ch <- phenotyping_channels
   }
+
+  if(!is.null(markers_to_score)){
+    markers <- FlowSOM::GetMarkers(ff_tmp, flowCore::colnames(ff_tmp))
+    channels_to_score <- grep(paste(markers_to_score,
+                                   collapse = ("|")), markers, value = TRUE)
+
+    vector <- c(phenotyping_channels, channels_to_score)
+    channels_to_score <- vector[!duplicated(names(vector))]
+    transform_ch <- channels_to_score
+
+  }
+
 
   if(is.null(out_dir)){
     out_dir <- file.path(getwd(), "Quality_Control")
@@ -197,31 +217,35 @@ fsom_aof <- function(fcs_files,
   if(!dir.exists(out_dir)){dir.create(out_dir)}
 
   if(arcsine_transform){
-    trans <- flowCore::transformList(names(phenotyping_channels),
+    trans <- flowCore::transformList(names(transform_ch),
                                      CytoNorm::cytofTransform)
-  }
-  else {
+  } else {
     if(is.null(transform_list)){
-      stop("parameter transform_list must be defined")
+      warrning("parameter transform_list was no defined, channels will not be tranformed")
     }
     trans <- transform_list
   }
 
-  fsom <- CytoNorm::prepareFlowSOM(file = fcs_files,
-                                   colsToUse = names(phenotyping_channels),
-                                   seed = seed,
-                                   nCells = nCells,
-                                   transformList = trans,
-                                   FlowSOM.params = list(xdim = xdim,
-                                                         ydim = ydim,
-                                                         nClus = nClus,
-                                                         scale = FALSE))
+
+  if (!is.null(seed)){
+    set.seed(seed)
+  }
+
+  o <- capture.output(ff <- FlowSOM::AggregateFlowFrames(fileNames = fcs_files,
+                                                         nCells, channels = names(transform_ch)))
+
+
+  if (exists("trans")){
+    ff <- flowCore::transform(ff, trans)
+  }
+
+  fsom <- FlowSOM::FlowSOM(input = ff, colsToUse = names(phenotyping_channels),
+                           nClus = nClus, seed = seed, xdim = xdim, ydim = ydim)
 
   if(to_plot){
     if(is.null(my_colors)){
       backgroundColors <- NULL
-    }
-    else {
+    } else {
 
       if(max(as.numeric(fsom$metaclustering)) < length(my_colors)){
         warning("The number of colors is greater than the number of metaclusters only
@@ -245,8 +269,7 @@ fsom_aof <- function(fcs_files,
 
     if(!is.null(batch)){
       filename <- paste0(batch, "_FlowSOM_clustering.pdf")
-    }
-    else {
+    } else {
       filename <- "FlowSOM_clustering.pdf"
     }
 

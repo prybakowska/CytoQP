@@ -47,7 +47,7 @@ transformList or arcsine_transform needs to be defined.}
 \item{nQ}{Numeric, as in CytoNorm, number of quantiles to use.
 Default = 101, which results in quantiles for every percent of the data.}
 
-\item{limit}{Numeric, as in CytoNorm, these values are modelled to map onto themselves
+\item{limit}{Numeric, as in CytoNorm, these values are modeled to map onto themselves
 by the spline.}
 
 \item{quantileValues}{Numeric, as in CytoNorm, If specified,
@@ -63,24 +63,29 @@ showing all quantiles. Ic norm_with_cluster = TRUE, FlowSOM clustering quality
 plots will be also generated. Default = FALSE.}
 
 \item{norm_with_clustering}{Logical, if data should be normalized using
-clustering algorithm, FlowSOM.}
+clustering algorithm, FlowSOM.Default set to FALSE.}
 
-\item{seed}{Numeric, set to obtain reproducible results, default NULL.}
+\item{seed}{Numeric, set to obtain reproducible results,
+when norm_with_clustering set to TRUE. Default NULL.}
 
 \item{nCells}{Numeric, the number of cells, to use for FlowSOM clustering.
 This number is determined by total number of fcs files, as by default 1000 cells
-is used per file.ONly if norm_with_clustering set to TRUE.}
+is used per file. Only if norm_with_clustering set to TRUE.}
 
-\item{xdim}{Numeric, parameter to pass to FlowSOM, width of the SOM grid.}
+\item{xdim}{Numeric, parameter to pass to FlowSOM, width of the SOM grid.
+Only if norm_with_clustering set to TRUE.}
 
-\item{ydim}{Numeric, parameter to pass to FlowSOM, geight of the SOM grid.}
+\item{ydim}{Numeric, parameter to pass to FlowSOM, geight of the SOM grid.
+Only if norm_with_clustering set to TRUE.}
 
-\item{nClus}{Numeric, exact number of clusters for metaclustering.}
+\item{nClus}{Numeric, exact number of clusters for metaclustering.
+Only if norm_with_clustering set to TRUE.}
 
 \item{clustering_markers}{Character vector, marker names to be used for clustering,
 can be full marker name e.g. "CD45$" (only CD45 marker will be picked) or
 "CD" (all markers containig "CD" will be used). Default (NULL), all the
-markers defined in markers_to_normalize will be used.}
+markers defined in markers_to_normalize will be used.
+Only if norm_with_clustering set to TRUE.}
 
 \item{out_dir}{Character, pathway to where the FlowSOM clustering plot should
 be saved, default is set to working directory. If NULL, files will be saved
