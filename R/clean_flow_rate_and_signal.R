@@ -481,7 +481,7 @@ clean_files <- function(files,
   }
   else {
 
-    if (!is.null(non_used_bead_ch)) {
+    if (is.null(non_used_bead_ch)) {
       non_bead_ch <- "140"
     }
     else {
