@@ -197,7 +197,8 @@ clean_files <- function(files,
                             Segment = Segment,
                             arcsine_transform = arcsine_transform,
                             data_type = data_type,
-                            non_used_bead_ch = non_used_bead_ch)
+                            non_used_bead_ch = non_used_bead_ch,
+                            channels_to_clean = channels_to_clean)
   }
 
 
@@ -480,7 +481,7 @@ clean_files <- function(files,
   }
   else {
 
-    if (!is.null(non_used_bead_ch)) {
+    if (is.null(non_used_bead_ch)) {
       non_bead_ch <- "140"
     }
     else {

@@ -239,7 +239,8 @@ bead_normalize <- function(files,
                                  remove_beads = remove_beads,
                                  to_plot = to_plot,
                                  k = k,
-                                 markers_to_keep = markers_to_keep)
+                                 markers_to_keep = markers_to_keep,
+                                beads="dvs")
 
   # save normalized FCS files
   flowCore::write.FCS(ff_norm, filename = file.path(out_dir,
