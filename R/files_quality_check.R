@@ -128,7 +128,7 @@ file_quality_check <- function(fcs_files,
                           fsom = fsom, out_dir = out_dir, batch = NULL)
   }
 
-  final_score <- file_outlier_detecion(scores = scores, out_dir = out_dir,
+  final_score <- file_outlier_detection(scores = scores, out_dir = out_dir,
                                        sd = sd)
   return(final_score)
 }
@@ -279,7 +279,7 @@ fsom_aof <- function(fcs_files,
                                    maxNodeSize = 3,
                                    backgroundColors = backgroundColors)
     fsomTsne <- FlowSOM::PlotDimRed(fsom = fsom, plotFile = NULL, seed = seed,
-                                    cTotal = 20000,
+                                    cTotal = 20000, check_duplicates = FALSE,
                                     title = "tSNE visualization of FlowSOM metaclusters")
 
     figure <- ggpubr::ggarrange(fsomPlot, fsomTsne,
@@ -397,8 +397,13 @@ aof_scoring <- function(fcs_files,
 #' @export
 scaled_aof_score <- function(aof_scores, out_dir = NULL, aof_channels = NULL,
                              batch = NULL){
-  aof_scores_scaled <- scale(aof_scores)
-  aof_scores_scaled <- pmax(aof_scores_scaled, 0)^2
+  if (nrow(aof_scores) > 1){
+    aof_scores_scaled <- scale(aof_scores)
+    aof_scores_scaled <- pmax(aof_scores_scaled, 0)^2
+  } else {
+    warning("Single file in batch, can not scales AOF values")
+    aof_scores_scaled <- aof_scores
+  }
   sample_scores <- apply(aof_scores_scaled, 1, sum, na.rm = TRUE)
 
   if(is.null(out_dir)){
@@ -478,7 +483,7 @@ scaled_aof_score <- function(aof_scores, out_dir = NULL, aof_channels = NULL,
 #' plots and save .png for Quality AOF scores for all files.
 #'
 #' @export
-file_outlier_detecion <- function(scores, out_dir = NULL, sd) {
+file_outlier_detection <- function(scores, out_dir = NULL, sd) {
 
   if(!inherits(scores, "data.frame") & !inherits(scores, "list")){
     stop("df scores are neither data frame nor list of the data frames")
@@ -496,7 +501,7 @@ file_outlier_detecion <- function(scores, out_dir = NULL, sd) {
     df_scores <- scores
   }
 
-  df_scores$file_names <- basename(rownames(df_scores))
+  df_scores$file_names <- basename(unlist(lapply(scores, rownames))) #If single file per batch, name was batchname and not filename
 
   scores_median <- stats::median(df_scores$sample_scores)
   scores_MAD <- stats::mad(df_scores$sample_scores)
