@@ -1,6 +1,7 @@
 Package: CytoQP
 Title: Cytometry data quality control and cleaninig
-Version: 0.0.0.9000
+Version: 0.0.1
+Date: 2025-08-05
 Authors@R: c(
     person("Paulina", "Rybakowska", , "paulina.rybakowska@genyo.es", role = c("aut", "cre")),
     person("Sofie", "Van Gassen", , "sofie.vangassen@ugent.be", role = "aut"),
@@ -55,4 +56,4 @@ biocViews: Mass cytometry, Flow cytometry, Large scale studies, Quality control,
 URL: https://github.com/prybakowska/CytoQP
 BugReports: https://github.com/prybakowska/CytoQP/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.2
