@@ -239,6 +239,7 @@ bead_normalize <- function(files,
                                  remove_beads = remove_beads,
                                  to_plot = to_plot,
                                  k = k,
+                                 beads = beads,
                                  markers_to_keep = markers_to_keep)
 
   # save normalized FCS files
