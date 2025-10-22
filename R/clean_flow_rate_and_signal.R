@@ -158,6 +158,139 @@ clean_files <- function(files,
 
 }
 
+#' Clean signal with PeacoQC
+#'
+#' @description Cleans the signal using PeacoQC package.
+#'
+#' @param files Character vector or list with the paths of the raw files.
+#' @param channels_to_clean Channels that need to be cleaned
+#' @param cores Number of cores to be used.
+#' @param plot As in PeacoQC. When PeacoQC removes more than the specified
+#' percentage, an overview plot will be made of all the selected channels and
+#' the deleted measurements. If set to TRUE, the PlotPeacoQC function is run to
+#' make an overview plot of the deleted measurements, even when nothing is
+#' removed. Default is set to 20. If an increasing or decreasing trend is found,
+#' a figure will also be made except if plot is set to FALSE.
+#' @param out_dir As in PeacoQC. Directory where a new folder will be created
+#' that consists of the generated fcs files, plots and report. If set to NULL,
+#' nothing will be stored.The default folder is the working directory.
+#' @param name_dir As in PeacoQC. Name of folder that will be generated in
+#' \code{out_directory}.` The default is "PeacoQC_results".
+#' @param MAD As in PeacoQC. The MAD parameter. Default is 6. If this is
+#' increased, the algorithm becomes less strict.
+#' @param IT_limit As in PeacoQC. The IsolationTree parameter. Default is 0.55.
+#' If this is increased, the algorithm becomes less strict.
+#' @param remove_zeros If this is set to TRUE, the zero values will be removed
+#' before the peak detection step. They will not be indicated as 'bad' value.
+#' This is recommended when cleaning mass cytometry data. Default is FALSE.
+#' @param arcsine_transform Logical, if the data should be transformed with
+#' arcsine transformation and cofactor 5, default is set to TRUE.
+#' Applies to signal cleaning.
+#' @param data_type Character, if MC (mass cytometry) of FC (flow cytometry)
+#' data are analyzed.
+#' @param suffix_old Old suffix to replace with \code{suffix_new}`.
+#' @param suffix_new What to replace \code{suffix_old} with.
+#'
+#' @return Cleaned, untransformed flow frame if arcsine_transform argument
+#' set to TRUE, otherwise transformed flow frame is returned.
+#'
+#' @examples
+#' # Set and create the directory where cleaned fcs files will be saved
+#'clean_dir <- file.path(dir, "Cleaned")
+#'
+#'# Define which files will be cleaned
+#'files <- list.files(bead_norm_dir,
+#'                    ignore.case = TRUE,
+#'                    pattern = "_beadNorm.fcs$",
+#'                    full.names = TRUE)
+#'
+#'
+#'# Clean files
+#'clean_files_PQC(files = files, cores = 1,
+#'                cores = 1, remove_zeros = TRUE,
+#'                channels_to_clean = channelsToClean,
+#'                arcsine_transform = TRUE,
+#'                data_type = "MC")
+#'
+#' @import ggplot2
+#'
+#' @export
+clean_files_PQC <- function (files, channels_to_clean,
+                             cores = 1, plot = 20, out_dir = ".", name_dir = "Cleaned",
+                             MAD=6, IT_limit=0.6, remove_zeros=TRUE,
+                             arcsine_transform = TRUE, data_type = "MC",
+                             suffix_old = "beadNorm", suffix_new = "cleaned")
+{
+  if (!is(files, "character") & !is(files, "list")) {
+    stop("files must be a character vector or a list")
+  }
+  if (is(files, "list")) {
+    files <- unlist(files)
+  }
+  if (any(!is(cores, "numeric") | cores < 1)) {
+    stop("cores must be a positive number")
+  }
+  if (!all(file.exists(files))) {
+    stop("incorrect file path, the fcs file does not exist")
+  }
+  if (cores == 1) {
+    lapply(files, function(x) {
+      ff <- flowCore::read.FCS(x)
+      channels_to_transform <- find_mass_ch(ff, value = FALSE)
+      if (arcsine_transform) {
+        if (data_type == "MC") {
+          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
+                                                                  CytoNorm::cytofTransform))
+        }
+        else if (data_type == "FC") {
+          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
+                                                                  flowCore::arcsinhTransform(a = 0, b = 1/150,
+                                                                                             c = 0)))
+        }
+        else {
+          stop("specify data type MC or FC")
+        }
+      }
+      else {
+        ff_t <- ff
+      }
+      PQC <- PeacoQC::PeacoQC(ff_t, channels = channels_to_clean, plot = plot,
+                              output_directory = out_dir, name_directory = name_dir,
+                              MAD = MAD, IT_limit = IT_limit, remove_zeros = remove_zeros,
+                              save_fcs = FALSE, time_unit=10000)
+      flowCore::write.FCS(ff[PQC$GoodCells], file.path(out_dir, basename(sub(suffix_old, suffix_new, x))))
+    })
+  }
+  else {
+    BiocParallel::bplapply(files, function(x) {
+      ff <- flowCore::read.FCS(x)
+      channels_to_transform <- find_mass_ch(ff, value = FALSE)
+      if (arcsine_transform) {
+        if (data_type == "MC") {
+          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
+                                                                  CytoNorm::cytofTransform))
+        }
+        else if (data_type == "FC") {
+          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
+                                                                  flowCore::arcsinhTransform(a = 0, b = 1/150,
+                                                                                             c = 0)))
+        }
+        else {
+          stop("specify data type MC or FC")
+        }
+      }
+      else {
+        ff_t <- ff
+      }
+      PQC <- PeacoQC::PeacoQC(ff_t, channels = channels_to_clean, plot = plot,
+                              output_directory = out_dir, name_directory = name_dir,
+                              MAD = MAD, IT_limit = IT_limit, remove_zeros = remove_zeros,
+                              save_fcs = FALSE, time_unit=50000)
+      flowCore::write.FCS(ff[PQC$GoodCells], file.path(out_dir, basename(sub(suffix_old, suffix_new, x))))
+    }, BPPARAM = BiocParallel::MulticoreParam(workers = cores))
+  }
+}
+
 .save_bead_clean <- function(file,
                              to_plot = "All",
                              clean_flow_rate = TRUE,

@@ -10,6 +10,7 @@ debarcode_files(
   file_batch_id,
   file_score = NULL,
   out_dir = NULL,
+  file_dir = NULL,
   min_threshold = TRUE,
   threshold = 0.18,
   to_plot = TRUE,

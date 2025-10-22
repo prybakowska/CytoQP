@@ -14,7 +14,7 @@
   ch <- grep(pattern = bead_channel, x = flowCore::colnames(flow_frame), value = TRUE)
   ids <- flow_frame[,ch] > 0
   # calculate threshold
-  th <- flowDensity::deGate(obj = flow_frame[ids,], channel = ch)
+  th <- flowDensity::deGate(obj = flow_frame[ids,], channel = ch, upper = TRUE)
   #remove beads
   cells_to_remove <- flow_frame@exprs[, ch] < th
   flow_frame <- flow_frame[cells_to_remove,]

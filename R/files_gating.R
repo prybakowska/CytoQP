@@ -79,6 +79,8 @@ gate_intact_cells <- function(flow_frame,
     stop("flow_frame must be a flow frame" )
   }
 
+  ff <- flow_frame
+
   if (is.null(file_name)){
     file_name <- ff@description$FIL
   } else {
@@ -412,6 +414,159 @@ gate_live_cells <- function(flow_frame,
 }
 
 
+#' Gate live cells, updated to keep eosinophils
+#'
+#' @description Performs gating of live cells using flowDensity::deGate
+#'
+#' @param flow_frame A flowframe that contains cytometry data.
+#' @param file_name Character, the file name used for saving the flow frame
+#' (if save_gated_flow_frame = TRUE) and for plotting, if NULL (default)
+#' the file name stored in keyword FIL will be used,
+#' @param viability_channel Character, the channel name used for viability staining
+#' @param tinypeak_removal_viability Numeric from 0-1, as in deGate to exclude/include
+#' tiny peaks in the tail of the density distribution curve for both viability channel
+#' @param tinypeak_removal_Iridium The same as tinypeak_removal_viability but for
+#' the head and tail of the density distribution curve in Iridium channel
+#' @param alpha_viability Numeric, 0-1, as in deGate specify the significance of change
+#' in the slope of viability channel
+#' @param alpha_Iridium The same as in alpha_viability but for the Iridium
+#' @param arcsine_transform Logical, if the data should be transformed with
+#' arcsine transformation and cofactor 5.
+#' @param save_gated_flow_frame Logical, if gated flow frame should be saved.
+#' Only cells falling into intact cell region will be saved. Default set to FALSE.
+#' @param suffix Character, suffix placed in the name of saved fcs file, only
+#' if save_gated_flow_frame = TRUE.Defult is "_intact_gated".
+#' @param out_dir Character, pathway to where the files should be saved,
+#' if NULL (default) files will be saved to file.path(getwd(), Gated).
+#' @param ... Arguments to pass to flowDensity::plotDens().
+#'
+#' @examples
+#'
+#' #' Set input directory
+#' aggregate_dir <- file.path(dir, "Aggregated")
+#'
+#' # List files for gating
+#' files <- list.files(path = aggregate_dir,
+#'                     pattern = ".fcs$",
+#'                     full.names = TRUE)
+#'
+#' # Create directory to store plot
+#' gate_dir <- file.path(getwd(), "Gated")
+#' if(!dir.exists(gate_dir)){dir.create(gate_dir)}
+#'
+#' # Gate the files and plot the gating strategy for each file
+#' n_plots <- 1
+#' png(file.path(gate_dir, paste0("gating.png")),
+#' width = n_plots * 300,
+#' height = length(files) * 300)
+#' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
+#'
+#' for (file in files){
+#'
+#'  ff <- flowCore::read.FCS(filename = file,
+#'                           transformation = FALSE)
+#'
+#'  ff <- gate_live_cells(flow_frame = ff,
+#'                        viability_channel = "Pt195Di", save_gated_flow_frame = TRUE,
+#'                        file_name = basename(file))
+#'}
+#'
+#'dev.off()
+#'
+#' @export
+#'
+#' @return An untransformed flow frame with live cells only
+gate_live_cells_update <- function(flow_frame,
+                                   file_name = NULL,
+                                   viability_channel,
+                                   eosinophil_channel,
+                                   eosinophil_gate = NULL,
+                                   tinypeak_removal_viability = 0.8,
+                                   alpha_viability = 0.1,
+                                   arcsine_transform = TRUE,
+                                   save_gated_flow_frame = FALSE,
+                                   suffix = "_live_gated",
+                                   out_dir = NULL,... ){
+
+  # Check parameters
+  if(!is(flow_frame, "flowFrame")) {
+    stop("flow_frame must be a flow frame" )
+  }
+
+  ff <- flow_frame
+
+  if (is.null(file_name)){
+    file_name <- ff@description$FIL
+  } else {
+    file_name
+  }
+
+  if(arcsine_transform == TRUE){
+
+    ff_t <- flowCore::transform(ff,
+                                flowCore::transformList( flowCore::colnames(ff)[grep("Di",  flowCore::colnames(ff))],
+                                                         CytoNorm::cytofTransform))
+  } else {
+    ff_t <- ff
+  }
+
+  selection <- matrix(TRUE,
+                      nrow = nrow(ff),
+                      ncol = 1,
+                      dimnames = list(NULL,
+                                      c("live")))
+
+
+  v_ch <- grep(viability_channel,  flowCore::colnames(ff), value = T)
+
+  eos_ch <- grep(eosinophil_channel,  flowCore::colnames(ff), value = T)
+
+  tr <- list()
+  for(m in c(eos_ch, v_ch)){
+    if (m == v_ch) {
+      upper = TRUE
+      alpha = alpha_viability
+      tr[[m]] <- flowDensity::deGate(ff_t, m,
+                                     tinypeak.removal = tinypeak_removal_viability,
+                                     upper = upper, use.upper = TRUE,
+                                     alpha = alpha, verbose = F, count.lim = 3)
+
+    } else {
+      if (is.null(eosinophil_gate)){
+        tr[[m]] <- flowDensity::deGate(ff_t[ff_t@exprs[,m]>0], m, verbose = F,
+                                       tinypeak.removal = 0.2, all.cuts = TRUE)
+        tr[[m]] <- tr[[m]][which.min(abs(tr[[m]] - 0.35))]
+      } else {
+        tr[[m]] <- eosinophil_gate
+      }
+    }
+  }
+
+  selection[(ff_t@exprs[,v_ch] > tr[[v_ch]]) &
+              (ff_t@exprs[,eos_ch] < tr[[eos_ch]]), "live"] <- FALSE
+
+  percentage <- (sum(selection)/length(selection))*100
+  flowDensity::plotDens(ff_t, c(v_ch, eos_ch),
+                        main = paste0(file_name," ( ", format(round(percentage, 2),
+                                                              nsmall = 2), "% )"),
+                        xlim = c(0, 8), ylim = c(0, 8), ...)
+
+  graphics::abline(h = tr[[eos_ch]])
+  graphics::abline(v = tr[[v_ch]])
+
+  graphics::points(ff_t@exprs[!selection[,"live"], c(v_ch, eos_ch)], pch = ".")
+
+  ff <- ff[selection[,"live"], ]
+
+  if(save_gated_flow_frame){
+
+    .save_flowframe(flow_frame, out_dir, suffix, file_name)
+  }
+
+  return(ff)
+
+}
+
 .save_flowframe <- function(flow_frame,
                             out_dir,
                             suffix,
@@ -489,4 +644,175 @@ gate_live_cells <- function(flow_frame,
   }
 
   return(selection)
+}
+
+#' Gate CD45+ cells
+#'
+#' @description Performs gating of CD45+ cells using a fixed cutoff.
+#'
+#' @param flow_frame A flowframe that contains cytometry data.
+#' @param file_name Character, the file name used for saving the flow frame
+#' (if save_gated_flow_frame = TRUE) and for plotting, if NULL (default)
+#' the file name stored in keyword FIL will be used.
+#' @param arcsine_transform Logical, if the data should be transformed
+#' with arcsine transformation and cofactor 5. If FALSE the data won't be
+#' transformed, thus transformed flow frame should be used if needed.
+#' Default TRUE.
+#' @param save_gated_flow_frame Logical, if gated flow frame should be saved.
+#' Only cells falling into intact cell region will be saved. Default set to FALSE.
+#' @param suffix Character, suffix placed in the name of saved fcs file, only
+#' if save_gated_flow_frame = TRUE.Defult is "_intact_gated".
+#' @param out_dir Character, pathway to where the files should be saved,
+#' if NULL (default) files will be saved to file.path(getwd(), Gated).
+#'
+#' @export
+#'
+#' @return An untransformed flow frame with CD45+ cells only
+gate_CD45pos_cells <- function(flow_frame,
+                               file_name = NULL,
+                               CD45_channel = "Pr141Di",
+                               CD45_threshold = 0.7,
+                               arcsine_transform = TRUE,
+                               save_gated_flow_frame = FALSE,
+                               out_dir = NULL,
+                               suffix = "_CD45_gated",
+                               ...){
+
+  # Check parameters
+  if(!is(flow_frame, "flowFrame")) {
+    stop("flow_frame must be a flow frame" )
+  }
+
+  ff <- flow_frame
+
+  if (is.null(file_name)){
+    file_name <- ff@description$FIL
+  } else {
+    file_name
+  }
+
+  if(arcsine_transform == TRUE){
+
+    ff_t <- flowCore::transform(ff,
+                                flowCore::transformList(
+                                  flowCore::colnames(ff)[grep("Di", flowCore::colnames(ff))],
+                                  CytoNorm::cytofTransform))
+  } else {
+    ff_t <- ff
+  }
+
+  selection <- matrix(TRUE,
+                      nrow = nrow(ff),
+                      ncol = 1,
+                      dimnames = list(NULL,
+                                      c("CD45+")))
+
+  tr <- list()
+  tr[[CD45_channel]] <- CD45_threshold
+
+  for(m in c(CD45_channel)){
+    selection[ff_t@exprs[,m] < tr[[CD45_channel]], "CD45+"] <- FALSE
+  }
+
+  percentage <- (sum(selection)/length(selection))*100
+  flowDensity::plotDens(ff_t, c(CD45_channel, "Ir191Di"),
+                        main = paste0(basename(file_name)," ( ", format(round(percentage, 2),
+                                                                        nsmall = 2), "% )"))
+
+  graphics::abline(h = c(tr[[CD45_channel]]))
+  graphics::points(ff_t@exprs[!selection[,"CD45+"], c(CD45_channel, "Ir191Di")], pch = ".")
+
+  ff <- ff[selection[,"CD45+"], ]
+
+  if(save_gated_flow_frame){
+
+    .save_flowframe(ff, out_dir, suffix, file_name)
+  }
+
+  return(ff)
+}
+
+#' Gate out beads
+#'
+#' @description Performs gating of beads using a fixed cutoff.
+#'
+#' @param flow_frame A flowframe that contains cytometry data.
+#' @param file_name Character, the file name used for saving the flow frame
+#' (if save_gated_flow_frame = TRUE) and for plotting, if NULL (default)
+#' the file name stored in keyword FIL will be used.
+#' @param arcsine_transform Logical, if the data should be transformed
+#' with arcsine transformation and cofactor 5. If FALSE the data won't be
+#' transformed, thus transformed flow frame should be used if needed.
+#' Default TRUE.
+#' @param save_gated_flow_frame Logical, if gated flow frame should be saved.
+#' Only cells falling into intact cell region will be saved. Default set to FALSE.
+#' @param suffix Character, suffix placed in the name of saved fcs file, only
+#' if save_gated_flow_frame = TRUE.Defult is "_intact_gated".
+#' @param out_dir Character, pathway to where the files should be saved,
+#' if NULL (default) files will be saved to file.path(getwd(), Gated).
+#'
+#' @export
+#'
+#' @return An untransformed flow frame with non-bead events only
+gate_beads <- function(flow_frame,
+                       file_name = NULL,
+                       arcsine_transform = TRUE,
+                       save_gated_flow_frame = FALSE,
+                       out_dir = NULL,
+                       suffix = "_CD45_gated",
+                       DNA1Threshold = 5,
+                       ...){
+
+  # Check parameters
+  if(!is(flow_frame, "flowFrame")) {
+    stop("flow_frame must be a flow frame" )
+  }
+
+  ff <- flow_frame
+
+  if (is.null(file_name)){
+    file_name <- ff@description$FIL
+  } else {
+    file_name
+  }
+
+  if(arcsine_transform == TRUE){
+
+    ff_t <- flowCore::transform(ff,
+                                flowCore::transformList(
+                                  flowCore::colnames(ff)[grep("Di", flowCore::colnames(ff))],
+                                  CytoNorm::cytofTransform))
+  } else {
+    ff_t <- ff
+  }
+
+  selection <- matrix(TRUE,
+                      nrow = nrow(ff),
+                      ncol = 1,
+                      dimnames = list(NULL,
+                                      c("beads")))
+
+  tr <- list()
+  tr[["Ir191Di"]] <- DNA1Threshold
+
+  for(m in c("Ir191Di")){
+    selection[ff_t@exprs[,m] > tr[["Ir191Di"]], "beads"] <- FALSE
+  }
+
+  percentage <- (sum(selection)/length(selection))*100
+  flowDensity::plotDens(ff_t, c("Ce140Di", "Ir191Di"),
+                        main = paste0(basename(file_name)," ( ", format(round(percentage, 2),
+                                                                        nsmall = 2), "% )"))
+
+  graphics::abline(h = c(tr[["Ir191Di"]]))
+  graphics::points(ff_t@exprs[!selection[,"beads"], c("Ce140Di", "Ir191Di")], pch = ".")
+
+  ff <- ff[selection[,"beads"], ]
+
+  if(save_gated_flow_frame){
+
+    .save_flowframe(ff, out_dir, suffix, file_name)
+  }
+
+  return(ff)
 }

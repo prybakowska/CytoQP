@@ -82,6 +82,7 @@ debarcode_files <- function(fcs_files,
                             file_batch_id,
                             file_score = NULL,
                             out_dir = NULL,
+                            file_dir = NULL,
                             min_threshold = TRUE,
                             threshold = 0.18,
                             to_plot = TRUE,
@@ -102,6 +103,10 @@ debarcode_files <- function(fcs_files,
     stop("incorrect file path, the fcs file does not exist")
   }
 
+  if(length(file_batch_id) != length(fcs_files)){
+    stop("the lenght of the file_batch_id is not equal to the lenght of fcs_files")
+  }
+
   if(!is.null(file_score)){
     if(!inherits(file_score, "data.frame")) {
       stop("file_scores is not a data frame")
@@ -109,12 +114,9 @@ debarcode_files <- function(fcs_files,
       # Select good quality files
       good_files <- file_scores$file_names[file_scores$quality == "good"]
       fcs_files_clean <- fcs_files[basename(fcs_files) %in% good_files]
+      file_batch_id <- file_batch_id[basename(fcs_files) %in% good_files]
       fcs_files <- fcs_files_clean
     }
-  }
-
-  if(length(file_batch_id) != length(fcs_files)){
-    stop("the lenght of the file_batch_id is not equal to the lenght of fcs_files")
   }
 
   if(is.null(out_dir)){
@@ -228,16 +230,18 @@ debarcode_files <- function(fcs_files,
   dat <- dat[, dat$bc_id !=0]
   fs <- CATALYST::sce2fcs(dat, split_by = "bc_id")
 
-  tmp_dir <- file.path(out_dir, batch_id)
-  if(!dir.exists(tmp_dir)) dir.create(tmp_dir)
+  if(is.null(file_dir)){
+    file_dir <- file.path(out_dir, batch_id)
+  }
+  if(!dir.exists(file_dir)){dir.create(file_dir)}
 
   file_name <- gsub("_cleaned.fcs|.fcs", "", basename(file))
 
-  flowCore::write.flowSet(fs, outdir = tmp_dir,
+  flowCore::write.flowSet(fs, outdir = file_dir,
                           filename = paste0(rownames(fs@phenoData), "_", file_name,
                                             "_debarcoded.fcs"))
 
-  filePaths <- file.path(tmp_dir, paste0(rownames(fs@phenoData), "_", file_name,
+  filePaths <- file.path(file_dir, paste0(rownames(fs@phenoData), "_", file_name,
                                          "_debarcoded.fcs"))
 
   return(list(fileOut, filePaths))
