@@ -18,7 +18,7 @@
 
 \item{timeCh}{Time channel.}
 
-\item{timestep}{}
+\item{timestep}{Step in time measurement}
 }
 \value{
 timeFlowData, the cell assignment to the bins.

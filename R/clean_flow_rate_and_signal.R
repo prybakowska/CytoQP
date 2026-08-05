@@ -414,7 +414,7 @@ clean_files_PQC <- function (files, channels_to_clean,
 #' @param x flow frame
 #' @param second_fraction the fraction of the seconds used in the data.
 #' @param timeCh Time channel.
-#' @param timestep
+#' @param timestep Step in time measurement
 #'
 #' @return timeFlowData, the cell assignment to the bins.
 #'
