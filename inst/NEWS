@@ -1,0 +1,4 @@
+CHANGES IN VERSION 0.0.2 (2026/08/05)
+--------------------------------------
+o Added gate_singlet for XTPRO data
+o Fixed small bugs that were reported when running devtools::document()

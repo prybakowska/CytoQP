@@ -816,3 +816,125 @@ gate_beads <- function(flow_frame,
 
   return(ff)
 }
+
+#' Gate singlet cells in XTPRO data
+#'
+#' @description Detects outliers in the selected channel(s) using MAD
+#' (mean absolute deviation).
+#'
+#' @param flow_frame A flowframe that contains XTPRO cytometry data.
+#' @param file_name Character, the file name used for saving the flow frame
+#' (if save_gated_flow_frame = TRUE) and for plotting, if NULL (default)
+#' the file name stored in keyword FIL will be used.
+#' @param channels character, channels name to be used for gating, default is
+#' to Event_length.
+#' @param n_mad Numeric, number of MADs to detect outliers.Default set to 2.
+#' @param arcsine_transform Logical, if the data should be transformed
+#' with arcsine transformation and cofactor 5. If FALSE the data won't be
+#' transformed, thus transformed flow frame should be used if needed.
+#' Default TRUE.
+#' @param save_gated_flow_frame Logical, if gated flow frame should be saved.
+#' Only cells falling into intact cell region will be saved. Default set to FALSE.
+#' @param suffix Character, suffix placed in the name of saved fcs file, only
+#' if save_gated_flow_frame = TRUE. Default is "_singlets_gated".
+#' @param out_dir Character, pathway to where the files should be saved,
+#' if NULL (default) files will be saved to file.path(getwd(), Gated).
+#' @param ... Additional arguments to pass to flowDensity::plotDens().
+#'
+#' @examples
+#' #' # Set input directory
+#' aggregate_dir <- file.path(dir, "Aggregated")
+#'
+#' # List files for gating
+#' files <- list.files(path = aggregate_dir,
+#'                     pattern = ".fcs$",
+#'                     full.names = TRUE)
+#'
+#' # Create directory to store plot
+#' gate_dir <- file.path(getwd(), "Gated")
+#' if(!dir.exists(gate_dir)){dir.create(gate_dir)}
+#'
+#' # Gate the files and plot the gating strategy for each file
+#' n_plots <- 1
+#' png(file.path(gate_dir, paste0("gating.png")),
+#'     width = n_plots * 300, height = length(files) * 300)
+#' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
+#'
+#' for (file in files){
+#'
+#'  ff <- flowCore::read.FCS(filename = file,
+#'                           transformation = FALSE)
+#'
+#'  ff <- gate_singlet_cells_XTPro(flow_frame = ff,
+#'                                 channels = "Event_length",
+#'                                 file_name = basename(file),
+#'                                 save_gated_flow_frame = TRUE)
+#'}
+#'
+#'dev.off()
+#'
+#' @export
+#'
+#' @return An untransformed flow frame with singlets only
+gate_singlet_cells_XTPro <- function (flow_frame, file_name = NULL, channels = "Event_length",
+                                      arcsine_transform = TRUE, save_gated_flow_frame = NULL,
+                                      suffix = "_singlets_gated", out_dir = NULL, ...)
+{
+  if (!is(flow_frame, "flowFrame")) {
+    stop("flow_frame must be a flow frame")
+  }
+  if (is.null(file_name)) {
+    file_name <- flow_frame@description$FIL
+  }else {
+    file_name
+  }
+  if (arcsine_transform == TRUE) {
+    flow_frame_t <- flowCore::transform(flow_frame, flowCore::transformList(flowCore::colnames(flow_frame)[grep("Di",
+                                                                                                                flowCore::colnames(flow_frame))], CytoNorm::cytofTransform))
+  } else {
+    flow_frame_t <- flow_frame
+  }
+  selection <- matrix(TRUE, nrow = nrow(flow_frame), ncol = 1,
+                      dimnames = list(NULL, c("singlets")))
+  selection[, "singlets"] <- .remove_outliers_XTPro(flow_frame = flow_frame_t,
+                                                    ylim = c(0, 8))
+  flow_frame <- flow_frame[selection[, "singlets"], ]
+  if (save_gated_flow_frame) {
+    .save_flowframe(flow_frame, out_dir, suffix, file_name)
+  }
+  return(flow_frame)
+}
+
+#' remove_outliers (i.e. multiplets)
+#'
+#' @description detects outliers in the selected channel(s) using MAD
+#' (mean absolute deviation).
+#'
+#' @param flow_frame A flowframe that contains XTPRO cytometry data.
+#' @param plot logicle, if to plot the data, default TRUE
+#' @param main character, title of the plot, default set to ""
+#' @param ... other arguments to pass plotDens
+#'
+#' @return matrix with the selected cells
+.remove_outliers_XTPro <- function (flow_frame,
+                                    plot = TRUE, main = "",
+                                    ...)
+{
+  values <- as.numeric(names(which((table(exprs(flow_frame)[,"Event_length"])/nrow(exprs(flow_frame))*100)>1))) #Keep values for which >1% of the cells have this value
+  boundaries <- c(0, max(values)+0.5)
+  selection <- (exprs(flow_frame)[, "Event_length"] >  boundaries[1] &
+                  exprs(flow_frame)[, "Event_length"] <  boundaries[2])
+
+  percentage <- (sum(selection)/length(selection)) * 100
+  if (plot) {
+    flowDensity::plotDens(flow_frame, c("Event_length", "Ir191Di"),
+                          main = paste0(main, " ( ", format(round(percentage,
+                                                                  2), nsmall = 2), "% )"), ...)
+    graphics::points(flow_frame@exprs[!selection, c("Event_length",
+                                                    "Ir191Di")], pch = ".")
+    graphics::abline(v = boundaries[1], col = "black")
+    graphics::abline(v = boundaries[2], col = "black")
+
+  }
+  return(selection)
+}
