@@ -1,3 +1,9 @@
+CHANGES IN VERSION 0.0.3 (2026/08/06)
+--------------------------------------
+o Added adjustment argument to gate_live_cells_update
+o Added workaround to deGate call in gate_live_cells_update, will now return
+  fixed value of 0.8
+
 CHANGES IN VERSION 0.0.2 (2026/08/05)
 --------------------------------------
 o Added gate_singlet for XTPRO data

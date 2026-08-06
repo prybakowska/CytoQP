@@ -485,6 +485,7 @@ gate_live_cells_update <- function(flow_frame,
                                    alpha_viability = 0.1,
                                    arcsine_transform = TRUE,
                                    save_gated_flow_frame = FALSE,
+                                   eosinophil_adjustment = 0.35,
                                    suffix = "_live_gated",
                                    out_dir = NULL,... ){
 
@@ -532,11 +533,14 @@ gate_live_cells_update <- function(flow_frame,
                                      alpha = alpha, verbose = F, count.lim = 3)
 
     } else {
-      if (is.null(eosinophil_gate)){
-        tr[[m]] <- flowDensity::deGate(ff_t[ff_t@exprs[,m]>0], m, verbose = F,
-                                       tinypeak.removal = 0.2, all.cuts = TRUE)
-        tr[[m]] <- tr[[m]][which.min(abs(tr[[m]] - 0.35))]
-      } else {
+      if (is.null(eosinophil_gate)) {
+        tr[[m]] <- tryCatch(flowDensity::deGate(ff_t[ff_t@exprs[, m] > 0], m,
+                                                verbose = F, tinypeak.removal = 0.2,
+                                                all.cuts = TRUE),
+                            error = function(e) 0.8)
+        tr[[m]] <- tr[[m]][which.min(abs(tr[[m]] - eosinophil_adjustment))]
+      }
+      else {
         tr[[m]] <- eosinophil_gate
       }
     }
