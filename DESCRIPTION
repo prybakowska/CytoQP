@@ -1,7 +1,7 @@
 Package: CytoQP
 Title: Cytometry data quality control and cleaninig
-Version: 0.0.2
-Date: 2026-08-05
+Version: 0.0.3
+Date: 2026-08-06
 Authors@R: c(
     person("Paulina", "Rybakowska", , "paulina.rybakowska@genyo.es", role = c("aut", "cre")),
     person("Sofie", "Van Gassen", , "sofie.vangassen@ugent.be", role = "aut"),
