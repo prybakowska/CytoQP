@@ -14,7 +14,7 @@ gate_live_cells_update(
   alpha_viability = 0.1,
   arcsine_transform = TRUE,
   save_gated_flow_frame = FALSE,
-  eosinophil_adjustment = 0.35,
+  eosinophil_adjustment = 0,
   suffix = "_live_gated",
   out_dir = NULL,
   ...
