@@ -902,7 +902,8 @@ gate_singlet_cells_XTPro <- function (flow_frame, file_name = NULL, channels = "
   selection <- matrix(TRUE, nrow = nrow(flow_frame), ncol = 1,
                       dimnames = list(NULL, c("singlets")))
   selection[, "singlets"] <- .remove_outliers_XTPro(flow_frame = flow_frame_t,
-                                                    ylim = c(0, 8))
+                                                    ylim = c(0, 8),
+                                                    main = file_name)
   flow_frame <- flow_frame[selection[, "singlets"], ]
   if (save_gated_flow_frame) {
     .save_flowframe(flow_frame, out_dir, suffix, file_name)
