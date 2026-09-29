@@ -755,6 +755,8 @@ gate_CD45pos_cells <- function(flow_frame,
 #' if save_gated_flow_frame = TRUE.Defult is "_intact_gated".
 #' @param out_dir Character, pathway to where the files should be saved,
 #' if NULL (default) files will be saved to file.path(getwd(), Gated).
+#' @param DNA1Threshold Threshold for the DNA1 gate for the bead gating
+#' @param TCRThreshold Threshold for the TCR gate for the bead gating
 #'
 #' @export
 #'
@@ -764,8 +766,9 @@ gate_beads <- function(flow_frame,
                        arcsine_transform = TRUE,
                        save_gated_flow_frame = FALSE,
                        out_dir = NULL,
-                       suffix = "_CD45_gated",
+                       suffix = "_bead_gated",
                        DNA1Threshold = 5,
+                       TCRThreshold = 5,
                        ...){
 
   # Check parameters
@@ -799,9 +802,10 @@ gate_beads <- function(flow_frame,
 
   tr <- list()
   tr[["Ir191Di"]] <- DNA1Threshold
+  tr[["Ce140Di"]] <- TCRThreshold
 
-  for(m in c("Ir191Di")){
-    selection[ff_t@exprs[,m] > tr[["Ir191Di"]], "beads"] <- FALSE
+  for(m in c("Ir191Di", "Ce140Di")){
+    selection[ff_t@exprs[,m] > tr[m], "beads"] <- FALSE
   }
 
   percentage <- (sum(selection)/length(selection))*100
@@ -810,6 +814,7 @@ gate_beads <- function(flow_frame,
                                                                         nsmall = 2), "% )"))
 
   graphics::abline(h = c(tr[["Ir191Di"]]))
+  graphics::abline(v = c(tr[["Ce140Di"]]))
   graphics::points(ff_t@exprs[!selection[,"beads"], c("Ce140Di", "Ir191Di")], pch = ".")
 
   ff <- ff[selection[,"beads"], ]

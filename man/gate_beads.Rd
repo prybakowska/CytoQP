@@ -10,8 +10,9 @@ gate_beads(
   arcsine_transform = TRUE,
   save_gated_flow_frame = FALSE,
   out_dir = NULL,
-  suffix = "_CD45_gated",
+  suffix = "_bead_gated",
   DNA1Threshold = 5,
+  TCRThreshold = 5,
   ...
 )
 }
@@ -35,6 +36,10 @@ if NULL (default) files will be saved to file.path(getwd(), Gated).}
 
 \item{suffix}{Character, suffix placed in the name of saved fcs file, only
 if save_gated_flow_frame = TRUE.Defult is "_intact_gated".}
+
+\item{DNA1Threshold}{Threshold for the DNA1 gate for the bead gating}
+
+\item{TCRThreshold}{Threshold for the TCR gate for the bead gating}
 }
 \value{
 An untransformed flow frame with non-bead events only
