@@ -1,6 +1,6 @@
 Package: CytoQP
 Title: Cytometry data quality control and cleaninig
-Version: 1.0.6
+Version: 1.0.7
 Date: 2026-09-29
 Authors@R: c(
     person("Paulina", "Rybakowska", , "paulina.rybakowska@genyo.es", role = c("aut", "cre")),
@@ -38,6 +38,7 @@ Imports:
     gridExtra,
     magrittr,
     pheatmap,
+    PeacoQC,
     RColorBrewer,
     S4Vectors,
     stats,

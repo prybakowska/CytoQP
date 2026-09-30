@@ -213,6 +213,7 @@ clean_files <- function(files,
 #'                data_type = "MC")
 #'
 #' @import ggplot2
+#' @import PeacoQC
 #'
 #' @export
 clean_files_PQC <- function (files, channels_to_clean,
