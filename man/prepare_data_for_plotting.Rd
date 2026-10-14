@@ -33,66 +33,26 @@ per clusters and metaclusters obtained from extract_pctgs_msi_per_flowsom functi
 For the MSI it is taking the MSI > 1.
 }
 \examples{
-# Define files before normalization
-gate_dir <- file.path(dir, "Gated")
-files_before_norm <- list.files(gate_dir,
-                                pattern = ".fcs",
-                                full.names = T)
+frequency_msi_list <- list(
+  before = list(
+    Metacluster_frequencies = matrix(
+      runif(40),
+      nrow = 10
+    )
+  ),
+  after = list(
+    Metacluster_frequencies = matrix(
+      runif(40),
+      nrow = 10
+    )
+  )
+)
 
-# Define files after normalization
-norm_dir <- file.path(dir, "CytoNormed")
-files_after_norm <- list.files(norm_dir,
-                               pattern = ".fcs",
-                               full.names = T)
-
-# files needs to be in the same order, check and order if needed
-test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
-                 basename(files_before_norm))
-
-batch_labels <- stringr::str_match(basename(files_before_norm), "day[0-9]*")[,1]
-
-mx <- extract_pctgs_msi_per_flowsom(files_after_norm = files_after_norm,
-                                    files_before_norm = files_before_norm,
-                                    nCells = 50000,
-                                    phenotyping_markers = c("CD", "HLA", "IgD"),
-                                    functional_markers = c("MIP", "MCP", "IL",
-                                                           "IFNa", "TNF", "TGF",
-                                                           "Gr"),
-                                    xdim = 10,
-                                    ydim = 10,
-                                    n_metaclusters = 35,
-                                    out_dir = norm_dir,
-                                    arcsine_transform = TRUE,
-                                    save_matrix = TRUE,
-                                    seed = 343)
-# create the list to store the plots
- plots <- list()
- for (name in names(mx[[1]])){
- df_plot <- prepare_data_for_plotting(frequency_msi_list = mx,
-                                       matrix_type = name,
-                                      n_neighbours = 11, seed = 1)
-
-
- batch <- stringr::str_match(rownames(df_plot), "day[0-9]*")[,1]
- samples_id <- ifelse(grepl("p1", rownames(df_plot)),"p1",
-                      ifelse(grepl("p2", rownames(df_plot)), "p2", "ref"))
- stimulation <- stringr::str_match(rownames(df_plot), "UNS|RSQ|IMQ|LPS|CPG")[,1]
-
- plots[[name]] <- plot_batch_using_freq_msi(df_plot = df_plot, fill = batch,
-                                            shape = samples_id, color = batch,
-                                            split_by_normalization = TRUE, title = name)
-
-}
-
-gg_a <- grid_arrange_common_legend(plot_lists = plots, nrow = 2, ncol = 2,
-                                  position = "right")
-
-ggplot2::ggsave(filename ="batch_effect_frequency_MSI.png",
-               device = "png",
-              path = norm_dir,
-               plot = gg_a,
-               units = "cm",
-               width = 22,
-               height = 14, dpi = 300)
+df_plot <- prepare_data_for_plotting(
+  frequency_msi_list = frequency_msi_list,
+  matrix_type = "Metacluster_frequencies",
+  n_neighbours = 3,
+  seed = 1
+)
 
 }

@@ -23,6 +23,10 @@ gate_CD45pos_cells(
 (if save_gated_flow_frame = TRUE) and for plotting, if NULL (default)
 the file name stored in keyword FIL will be used.}
 
+\item{CD45_channel}{Character, channel used for CD45+ cell gating.}
+
+\item{CD45_threshold}{Numeric, cutoff for identifying CD45+ cells.}
+
 \item{arcsine_transform}{Logical, if the data should be transformed
 with arcsine transformation and cofactor 5. If FALSE the data won't be
 transformed, thus transformed flow frame should be used if needed.
@@ -36,10 +40,31 @@ if NULL (default) files will be saved to file.path(getwd(), Gated).}
 
 \item{suffix}{Character, suffix placed in the name of saved fcs file, only
 if save_gated_flow_frame = TRUE.Defult is "_intact_gated".}
+
+\item{...}{Additional arguments (usage depends on the function implementation).}
 }
 \value{
 An untransformed flow frame with CD45+ cells only
 }
 \description{
 Performs gating of CD45+ cells using a fixed cutoff.
+}
+\examples{
+fcs_file <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
+
+ff <- flowCore::read.FCS(
+  fcs_file,
+  transformation = FALSE
+)
+
+ff_cd45 <- gate_CD45pos_cells(
+  flow_frame = ff,
+  file_name = basename(fcs_file),
+  save_gated_flow_frame = FALSE
+)
+
 }

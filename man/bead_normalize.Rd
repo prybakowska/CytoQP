@@ -2,14 +2,14 @@
 % Please edit documentation in R/bead_normalize.R
 \name{bead_normalize}
 \alias{bead_normalize}
-\title{Bead-based normalization}
+\title{Perform bead-based normalization}
 \usage{
 bead_normalize(
   files,
   cores = 1,
   markers_to_keep = NULL,
   non_mass_channel = NULL,
-  beads = "dvs",
+  beads = c(89, 115, 140, 159, 175, 209),
   norm_to_ref = NULL,
   remove_beads = TRUE,
   to_plot = TRUE,
@@ -19,80 +19,92 @@ bead_normalize(
 )
 }
 \arguments{
-\item{files}{Character vector or list with the paths of the raw files.}
+\item{files}{Character vector or list containing paths to the FCS files
+to be normalized.}
 
-\item{cores}{Number of cores to be used.Works only for not-Widows users.}
+\item{cores}{Number of cores used for processing. Default is 1.}
 
-\item{markers_to_keep}{Character vector, marker names to be kept after
-the normalization, can be full marker name e.g. "CD45" or "CD".
-If NULL (default) all markers will be normalized and kept in flowframe.
-Selection of the markers will reduce file volume and speedup the analysis.
-Non-mass channels like Time, Event_length, Gaussian parameters and in addition
-palladium barcoding channels are kept if non_mass_ch set to NULL.}
+\item{markers_to_keep}{Character vector specifying marker names or patterns
+to retain after normalization, for example \code{"CD45"} or \code{"CD"}.
+If \code{NULL}, all channels are retained.}
 
-\item{non_mass_channel}{Character vector, non-mass channels to keep for
-further analysis. Can be full channel name like Eu151Di or 151.
-By default "Time" and "event_length" will be always kept in the flow frame.}
+\item{non_mass_channel}{Character vector specifying additional non-mass
+channels to retain. \code{Time} and event-length channels are retained
+automatically.}
 
-\item{beads}{Character, as in CATALYST::normCytof, "dvs"
-(for bead masses 140, 151, 153 ,165, 175)
-or "beta" (for bead masses 139, 141, 159, 169, 175)
-or a numeric vector of masses. Default is set to "dvs".}
+\item{beads}{Numeric vector specifying the bead masses used for
+normalization, as in \code{CATALYST::normCytof}. Default is
+\code{c(89, 115, 140, 159, 175, 209)}.}
 
-\item{norm_to_ref}{flow frame, created by baseline_file function to which
-input data will be normalized, default is set to NULL.}
+\item{norm_to_ref}{Reference \code{flowFrame}, typically generated with
+\code{baseline_file()}, to which the input files are normalized.
+If \code{NULL}, each file is normalized to its own bead means.}
 
-\item{remove_beads}{Logical, as in CATALYST::normCytof if beads should be
-removed from fcs files. Default set to TRUE. Note, should be set to FALSE if
-none of the channels is beads-specific.}
+\item{remove_beads}{Logical indicating whether normalization beads should
+be removed after normalization. Default is \code{TRUE}.}
 
-\item{to_plot}{Logical if to plot bead gate and bead normalization lines
-for each file.Defaults is set to TRUE.}
+\item{to_plot}{Logical indicating whether bead-gating and normalization
+diagnostic plots should be generated. Default is \code{TRUE}.}
 
-\item{out_dir}{Character, pathway to where the bead normalized fcs files
-and plots should be saved, for plots only if argument to_plot = TRUE,
-default is set to file.path(getwd(), BeadNorm).}
+\item{out_dir}{Character specifying the directory where normalized FCS
+files and diagnostic plots are saved. If \code{NULL}, a directory named
+\code{"BeadNorm"} is created in the current working directory.}
 
-\item{k}{The same as in CATALYST::normCytof, integer width of the
-median window used for bead smoothing (affects visualizations only).}
+\item{k}{Integer specifying the width of the median window used for bead
+smoothing, as in \code{CATALYST::normCytof}. Default is 80.}
 
-\item{...}{Additional arguments to pass to normCytof.}
+\item{...}{Additional arguments passed to \code{CATALYST::normCytof}.}
 }
 \value{
-Save bead-normalized fcs files and plots to out_dir.
+A list containing the results of the normalization for each input FCS file.
+Normalized FCS files are written to \code{out_dir}.
 }
 \description{
-Performs bead-based normalization using beads spiked in
-the sample. It is based on functions from CATALYST package.
+Performs bead-based normalization of FCS files using normalization beads
+spiked into the samples. Normalization is performed using
+\code{CATALYST::normCytof}. A reference flow frame generated with
+\code{baseline_file()} can be supplied to normalize multiple files to the
+same bead reference.
 }
 \examples{
-# set input directory (pathway to the files that are going to be normalized)
-raw_data_dir <- file.path(dir, "RawFiles")
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# set a directory where bead-normalized fcs files and plots will be saved
-bead_norm_dir <- file.path(dir, "BeadNorm")
-
-# define full pathway to the files that you want to normalize
-files <- list.files(raw_data_dir,
-                    pattern = ".FCS$",
-                    full.names = TRUE)
-
-# create baseline file to which all the files will be normalized
 set.seed(2)
-ref_sample <- baseline_file(fcs_files = files,
-                            beads = "dvs",
-                            out_dir = bead_norm_dir)
 
-# Normalize files
-bead_normalize(files, cores = 1,
-               out_dir = bead_norm_dir,
-               non_mass_channel = NULL,
-               norm_to_ref = ref_sample,
-               to_plot = TRUE,
-               remove_beads = TRUE,
-               k = 80,
-               markers_to_keep = c("CD", "HLA", "IgD", "TCR", "Ir",
-                                 "Viability","IL", "IFNa",
-                                   "TNF", "TGF", "MIP", "MCP", "Granz"))
+ref_file <- baseline_file(
+  fcs_files = fcs_files,
+  out_dir = file.path(tempdir(), "BeadNorm")
+)
+
+files_beadnorm <- bead_normalize(
+  files = fcs_files,
+  cores = 1,
+  non_mass_channel = NULL,
+  norm_to_ref = ref_file,
+  to_plot = TRUE,
+  remove_beads = TRUE,
+  k = 80,
+  out_dir = file.path(tempdir(), "BeadNorm"),
+  markers_to_keep = c(
+    "CD",
+    "HLA",
+    "IgD",
+    "TCR",
+    "Siglec",
+    "Ir",
+    "Viability",
+    "IL",
+    "IFNa",
+    "TNF",
+    "TGF",
+    "MIP",
+    "MCP",
+    "Granz"
+  )
+)
 
 }

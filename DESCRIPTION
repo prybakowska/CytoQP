@@ -37,13 +37,13 @@ Imports:
     grid,
     gridExtra,
     magrittr,
+    methods,
     pheatmap,
     PeacoQC,
     RColorBrewer,
     S4Vectors,
     stats,
     stringr,
-    SummarizedExperiment,
     utils,
     uwot
 Remotes:
@@ -59,3 +59,4 @@ URL: https://github.com/prybakowska/CytoQP
 BugReports: https://github.com/prybakowska/CytoQP/issues
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.2

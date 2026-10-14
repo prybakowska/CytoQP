@@ -8,7 +8,7 @@ plot_2D_scatter_plots(
   fcs_files,
   markers_to_plot,
   y_marker,
-  out_dir = NULL,
+  out_dir = "./",
   out_put_name = "marker_plots.png"
 )
 }
@@ -33,11 +33,18 @@ Save plots in out_dir.
 Plots biaxial plots
 }
 \examples{
-plot_2D_scatter_plots(fcs_files = fcs_files,
-                      markers_to_plot = c("CD", "HLA"),
-                      y_marker = "CD45$",
-                      out_dir = getwd(),
-                      out_put_name = "marker_plots.png")
+fcs_files <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
 
+plot_2D_scatter_plots(
+  fcs_files = fcs_files,
+  markers_to_plot = c("CD", "HLA"),
+  y_marker = "CD45$",
+  out_put_name = "marker_plots.png",
+  out_dir = tempdir()
+)
 
 }

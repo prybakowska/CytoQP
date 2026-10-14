@@ -59,32 +59,34 @@
 #' @export
 #'
 #' @examples
-#' # Set input directory
-#' gate_dir <- file.path(dir, "Gated")
+#' fcs_files <- system.file(
+#'   "extdata",
+#'   paste0("Center", 1:4, "_batch1.fcs"),
+#'   package = "CytoQP"
+#' )
 #'
-#' # Define reference samples
-#' files_ref <- list.files(gate_dir,
-#'                         pattern = "*_gated.fcs$",
-#'                         full.names = TRUE,
-#'                         recursive = T)
+#' df <- data.frame(
+#'   file_paths = fcs_files,
+#'   batch_labels = paste0("Center", 1:4),
+#'   ref_ids = rep(TRUE, 4)
+#' )
 #'
-#' df <- data.frame("file_paths" = files_ref,
-#'                 "batch_labels" = stringr::str_match(files_ref, "day[0-9]*")[,1],
-#'                 "ref_ids" = grepl("REF", files_ref))
-#'
-#'
-#' model <- train_REF_model(df = df,
-#'                         markers_to_normalize = c("CD", "HLA", "IgD",
-#'                                                  "IL", "TN", "MCP", "MIP",
-#'                                                  "Gran", "IFNa"),
-#'                         arcsine_transform = TRUE,
-#'                         nQ = 2,
-#'                         limit = c(0,8),
-#'                         quantileValues = c(0.05, 0.95),
-#'                         goal = "mean",
-#'                         norm_with_clustering = FALSE,
-#'                         save_model = TRUE,
-#'                         clustering_markers = c("CD", "HLA", "IgD"))
+#' model <- train_REF_model(
+#'   df = df,
+#'   markers_to_normalize = c(
+#'     "CD",
+#'     "HLA",
+#'     "IgD"
+#'   ),
+#'   nQ = 2,
+#'   limit = c(0, 8),
+#'   quantileValues = c(0.05, 0.95),
+#'   goal = "mean",
+#'   to_plot = FALSE,
+#'   norm_with_clustering = FALSE,
+#'   save_model = FALSE,
+#'   out_dir = file.path(tempdir(), "CytoNormed")
+#' )
 #'
 train_REF_model <- function(df,
                             markers_to_normalize = NULL,
@@ -252,36 +254,40 @@ train_REF_model <- function(df,
 #' @export
 #'
 #' @examples
-#' # Set input directory
-#' gate_dir <- file.path(dir, "Gated")
+#' fcs_files <- system.file(
+#'   "extdata",
+#'   paste0("Center", 1:4, "_batch1.fcs"),
+#'   package = "CytoQP"
+#' )
 #'
-#' # Define reference samples
-#' files_ref <- list.files(gate_dir,
-#'                         pattern = "*_gated.fcs$",
-#'                         full.names = TRUE,
-#'                         recursive = T)
+#' df <- data.frame(
+#'   file_paths = fcs_files,
+#'   batch_labels = paste0("Center", 1:4),
+#'   ref_ids = rep(TRUE, 4)
+#' )
 #'
-#' df <- data.frame("file_paths" = files_ref,
-#'                 "batch_labels" = stringr::str_match(files_ref, "day[0-9]*")[,1],
-#'                 "ref_ids" = grepl("REF", files_ref))
+#' model <- train_REF_model(
+#'   df = df,
+#'   markers_to_normalize = c(
+#'     "CD3",
+#'     "CD14",
+#'     "CD19"
+#'   ),
+#'   nQ = 2,
+#'   limit = c(0, 8),
+#'   quantileValues = c(0.05, 0.95),
+#'   to_plot = FALSE,
+#'   save_model = FALSE,
+#'   out_dir = file.path(tempdir(), "CytoNormed")
+#' )
 #'
-#'
-#' model <- train_REF_model(df = df,
-#'                         markers_to_normalize = c("CD", "HLA", "IgD",
-#'                                                  "IL", "TN", "MCP", "MIP",
-#'                                                  "Gran", "IFNa"),
-#'                         arcsine_transform = TRUE,
-#'                         nQ = 2,
-#'                         limit = c(0,8),
-#'                         quantileValues = c(0.05, 0.95),
-#'                         goal = "mean",
-#'                         norm_with_clustering = FALSE,
-#'                         save_model = TRUE,
-#'                         clustering_markers = c("CD", "HLA", "IgD"))
-#'
-#' # Normalize files
-#' normalize_REF(model = model, df = df, arcsine_transform = TRUE,
-#'               norm_with_clustering = FALSE)
+#' normalize_REF(
+#'   model = model,
+#'   df = df,
+#'   arcsine_transform = TRUE,
+#'   norm_with_clustering = FALSE,
+#'   out_dir = file.path(tempdir(), "CytoNormed")
+#' )
 #'
 normalize_REF <- function(model,
                           df,
@@ -306,15 +312,19 @@ normalize_REF <- function(model,
   }
 
   if(arcsine_transform){
-    flow_frame <- flowCore::read.FCS(df$file_paths[1])
 
+    channels <- colnames(model$refQuantiles)
 
-    trans <- flowCore::transformList(flowCore::colnames(flow_frame),
-                                     CytoNorm::cytofTransform)
-    trans_rev <- flowCore::transformList(flowCore::colnames(flow_frame),
-                                         CytoNorm::cytofTransform.reverse)
+    trans <- flowCore::transformList(
+      channels,
+      CytoNorm::cytofTransform
+    )
 
-  } else {
+    trans_rev <- flowCore::transformList(
+      channels,
+      CytoNorm::cytofTransform.reverse
+    )
+  }else {
     if(is.null(transformList)){
       stop("define transformList")
     }

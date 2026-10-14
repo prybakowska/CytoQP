@@ -27,6 +27,8 @@ plot_marker_quantiles(
 
 \item{batch_pattern}{Character, batch pattern to be match in the fcs file name}
 
+\item{batch_labels}{Character vector containing the batch label for each FCS file.}
+
 \item{remove_beads}{Logical, if beads needs to be removed. This needs to be
 set to TRUE if files contain beads e.g before beads normalization,
 default is set to TRUE. For the visualization purpose the beads will be
@@ -48,6 +50,9 @@ arcsine transformation and cofactor 5.}
 \item{markers_to_plot}{character vector, marker names to be plotted, can be
 full marker name e.g. "CD45" or "CD" if all CD-markers needs to be plotted}
 
+\item{plot_name}{Character string specifying the name of the output plot file.
+Default is \code{"Marker_distribution_across_aliquots_and_batches"}.}
+
 \item{manual_colors}{character, vector of the colors to be used,
 the number of colors needs to be equal to the length of batch_pattern}
 
@@ -67,34 +72,23 @@ Calculates quantiles (0.01, 0.25, 0.5, 0.75, 0.99) for
 selected markers and plots them as diagnostic plots.
 }
 \examples{
-# Define files for visualization
-# Before normalization
-raw_data_dir <- file.path(dir, "RawFiles")
-files_b <- list.files(raw_data_dir,
-                      pattern = ".FCS$",
-                      ignore.case = T,
-                      full.names = TRUE)
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# After normalization
-bead_norm_dir <- file.path(dir, "BeadNorm")
-files_a <- list.files(bead_norm_dir,
-                      pattern = "_beadNorm.fcs$",
-                      ignore.case = T,
-                      full.names = TRUE)
-
-# Define batch id and sample id for each file
-batch_pattern <- stringr::str_match(basename(files_b), "(?i).*(day[0-9]*).*.FCS")[,2]
-
-plot_marker_quantiles(files_after_norm = files_a,
-                     files_before_norm = files_b,
-                     batch_pattern = batch_pattern,
-                     arcsine_transform = TRUE,
-                     remove_beads = TRUE,
-                     bead_channel = "140",
-                     uncommon_prefix = "_beadNorm.fcs|.FCS",
-                     markers_to_plot = c("CD", "HLA", "IgD", "IL", "TNF",
-                                         "TGF", "GR", "IFNa"),
-                     manual_colors = c("darkorchid4", "darkorange", "darkgreen"),
-                     out_dir = bead_norm_dir)
+plot_marker_quantiles(
+  files_before_norm = fcs_files,
+  files_after_norm = fcs_files,
+  batch_labels = paste0("Center", 1:4),
+  remove_beads = FALSE,
+  markers_to_plot = c(
+    "CD",
+    "HLA",
+    "IgD"
+  ),
+  out_dir = tempdir()
+)
 
 }

@@ -25,6 +25,12 @@ barcode_name: defines to which barcode each file belongs
 fcs_new_name: a name for the fcs file that will be given after deconvolution
 and aggregation.}
 
+\item{barcode_column}{Character string specifying the column in \code{md}
+containing the barcode identifiers.}
+
+\item{batch_column}{Character string specifying the column in \code{md}
+containing the batch identifiers.}
+
 \item{cores}{Number of cores to be used.}
 
 \item{channels_to_keep}{Character vector with channel names to be kept.
@@ -47,34 +53,26 @@ Performs aggregation of debarcoded files, assigning user defined
 name to each file.
 }
 \examples{
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# Set input directory
-debarcode_dir <- file.path(dir, "Debarcoded")
-# Define files for debarcoding
-files <- list.files(debarcode_dir,
-                    pattern = "_debarcoded.fcs$",
-                    full.names = TRUE, recursive = T)
+md <- data.frame(
+  barcode_name = "Center1",
+  batch = "batch1",
+  fcs_new_name = "sample_aggregated.fcs"
+)
 
-# Define out_dir for aggregated files
-aggregate_dir <- file.path(dir, "Aggregated")
-
-# Bring metadata
-md <- utils::read.csv(file.path(dir, "RawFiles", "meta_data.csv"))
-
-# Assign barcodes names
-md$barcode_name <- paste0(rownames(CATALYST::sample_key)[md$BARCODE])
-
-# Assign new sample names specifying patient id and its batch name
-md$fcs_new_name <- paste0(md$ID, "_", md$STIM, "_", md$BATCH, ".fcs")
-
-# Aggregate and deconvolute file names
-aggregate_files(fcs_files = files,
-                md,
-                barcode_column = "barcode_name",
-                batch_column = "BATCH",
-                cores = 1,
-
-                out_dir = aggregate_dir,
-                write_agg_file = TRUE)
+files_aggregated <- aggregate_files(
+  fcs_files = fcs_files,
+  md = md,
+  barcode_column = "barcode_name",
+  batch_column = "batch",
+  cores = 1,
+  write_agg_file = FALSE,
+  out_dir = file.path(tempdir(), "Aggregated")
+)
 
 }

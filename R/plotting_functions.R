@@ -29,6 +29,7 @@
 #' @param files_before_norm Character vector or list with the paths of the raw files.
 #' @param files_after_norm Character vector or list with the paths of the normalized files.
 #' @param batch_pattern Character, batch pattern to be match in the fcs file name
+#' @param batch_labels Character vector containing the batch label for each FCS file.
 #' @param uncommon_prefix Character vector or string, uncommon prefix in
 #' the basename of the fcs files. The file names need to match, so uncommon prefix
 #' needs to be removed. If NULL (default) prefix like
@@ -45,6 +46,8 @@
 #' arcsine transformation and cofactor 5.
 #' @param markers_to_plot character vector, marker names to be plotted, can be
 #' full marker name e.g. "CD45" or "CD" if all CD-markers needs to be plotted
+#' @param plot_name Character string specifying the name of the output plot file.
+#' Default is \code{"Marker_distribution_across_aliquots_and_batches"}.
 #' @param manual_colors character, vector of the colors to be used,
 #' the number of colors needs to be equal to the length of batch_pattern
 #' @param out_dir Character, pathway to where the plots should be saved,
@@ -57,35 +60,24 @@
 #' @return Save the pdf with plots to out_dir.
 #'
 #' @examples
-#' # Define files for visualization
-#' # Before normalization
-#' raw_data_dir <- file.path(dir, "RawFiles")
-#' files_b <- list.files(raw_data_dir,
-#'                       pattern = ".FCS$",
-#'                       ignore.case = T,
-#'                       full.names = TRUE)
+#' fcs_files <- system.file(
+#'   "extdata",
+#'   paste0("Center", 1:4, "_batch1.fcs"),
+#'   package = "CytoQP"
+#' )
 #'
-#' # After normalization
-#' bead_norm_dir <- file.path(dir, "BeadNorm")
-#' files_a <- list.files(bead_norm_dir,
-#'                       pattern = "_beadNorm.fcs$",
-#'                       ignore.case = T,
-#'                       full.names = TRUE)
-#'
-#' # Define batch id and sample id for each file
-#' batch_pattern <- stringr::str_match(basename(files_b), "(?i).*(day[0-9]*).*.FCS")[,2]
-#'
-#' plot_marker_quantiles(files_after_norm = files_a,
-#'                      files_before_norm = files_b,
-#'                      batch_pattern = batch_pattern,
-#'                      arcsine_transform = TRUE,
-#'                      remove_beads = TRUE,
-#'                      bead_channel = "140",
-#'                      uncommon_prefix = "_beadNorm.fcs|.FCS",
-#'                      markers_to_plot = c("CD", "HLA", "IgD", "IL", "TNF",
-#'                                          "TGF", "GR", "IFNa"),
-#'                      manual_colors = c("darkorchid4", "darkorange", "darkgreen"),
-#'                      out_dir = bead_norm_dir)
+#' plot_marker_quantiles(
+#'   files_before_norm = fcs_files,
+#'   files_after_norm = fcs_files,
+#'   batch_labels = paste0("Center", 1:4),
+#'   remove_beads = FALSE,
+#'   markers_to_plot = c(
+#'     "CD",
+#'     "HLA",
+#'     "IgD"
+#'   ),
+#'   out_dir = tempdir()
+#' )
 #'
 #' @import ggplot2
 #' @importFrom magrittr %>%
@@ -307,17 +299,24 @@ plot_marker_quantiles <- function(files_before_norm,
 #' @export
 #'
 #' @examples
-#' plot_2D_scatter_plots(fcs_files = fcs_files,
-#'                       markers_to_plot = c("CD", "HLA"),
-#'                       y_marker = "CD45$",
-#'                       out_dir = getwd(),
-#'                       out_put_name = "marker_plots.png")
+#' fcs_files <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
+#' plot_2D_scatter_plots(
+#'   fcs_files = fcs_files,
+#'   markers_to_plot = c("CD", "HLA"),
+#'   y_marker = "CD45$",
+#'   out_put_name = "marker_plots.png",
+#'   out_dir = tempdir()
+#' )
 #'
 plot_2D_scatter_plots <- function(fcs_files,
                                   markers_to_plot,
                                   y_marker,
-                                  out_dir = NULL,
+                                  out_dir = "./",
                                   out_put_name = "marker_plots.png"){
 
 

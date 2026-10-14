@@ -18,6 +18,8 @@ warrning if he files are not in order
 Tests the order of the files
 }
 \examples{
-test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
-basename(files_before_norm))
+test_match_order(
+  x = c("sample1.fcs", "sample2.fcs"),
+  y = c("sample1.fcs", "sample2.fcs")
+)
 }

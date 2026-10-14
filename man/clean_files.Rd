@@ -2,7 +2,7 @@
 % Please edit documentation in R/clean_flow_rate_and_signal.R
 \name{clean_files}
 \alias{clean_files}
-\title{Clean flow rate and signal}
+\title{Clean Flow Rate and Signal}
 \usage{
 clean_files(
   files,
@@ -25,84 +25,77 @@ clean_files(
 )
 }
 \arguments{
-\item{files}{Character vector or list with the paths of the raw files.}
+\item{files}{Character vector or list containing paths to FCS files.}
 
-\item{cores}{Number of cores to be used.}
+\item{cores}{Number of cores to use. Default is 1.}
 
-\item{to_plot}{Character variable that indicates if plots should be generated.
-The default is "All", which generates plots for flow rate and all channels.
-Other options are "Flagged Only", plots the flow rate and channels that were
-spotted with flowCut as incorrect and "None", does not plots anything.}
+\item{to_plot}{Character specifying which diagnostic plots should be
+generated. Options are \code{"All"}, \code{"Flagged Only"}, and
+\code{"None"}.}
 
-\item{clean_flow_rate}{Logical, if flow rate should be cleaned.}
+\item{clean_flow_rate}{Logical indicating whether flow-rate cleaning should
+be performed. Default is \code{TRUE}.}
 
-\item{clean_signal, }{Logical, if signal should be cleaned.}
+\item{clean_signal}{Logical indicating whether signal cleaning should be
+performed. Default is \code{TRUE}.}
 
-\item{out_dir}{Character, pathway to where the plots should be saved,
-only if argument to_plot = TRUE, default is set to file.path(getwd(), Cleaned).}
+\item{out_dir}{Directory where cleaned FCS files and diagnostic plots are
+written. If \code{NULL}, a \code{"Cleaned"} directory is created in the
+current working directory.}
 
-\item{alpha}{numeric, as in flowAI::flow_auto_qc. The statistical
-significance level used to accept anomalies. The default value is 0.01.
-Applies to flow rate.}
+\item{alpha}{Statistical significance level used for flow-rate anomaly
+detection. Default is 0.01.}
 
-\item{data_type}{Character, if MC (mass cytometry) of FC (flow cytometry)
-data are analyzed.}
+\item{data_type}{Character specifying the cytometry data type:
+\code{"MC"} for mass cytometry or \code{"FC"} for flow cytometry.}
 
-\item{channels_to_clean}{Character vector of the channels that needs
-to be cleaned.Applies to signal cleaning.}
+\item{channels_to_clean}{Optional character vector specifying channels used
+for signal cleaning.}
 
-\item{Segment}{As in flowCut, an integer value that specifies the
-number of events in each segment to be analyzed.Default is 1000 events.}
+\item{Segment}{Number of events per segment used by flowCut.
+Default is 1000.}
 
-\item{arcsine_transform}{Logical, if the data should be transformed with
-arcsine transformation and cofactor 5, default is set to TRUE.
-Applies to signal cleaning.}
+\item{arcsine_transform}{Logical indicating whether the data should be
+transformed before signal cleaning. Default is \code{TRUE}.}
 
-\item{non_used_bead_ch}{Character vector, bead channels that does not contain
-any marker information, thus do not need to be cleaned and used
-for further analysis.Applies to signal cleaning.}
+\item{non_used_bead_ch}{Optional character vector specifying bead channels
+that should be excluded from signal cleaning.}
 
-\item{MaxPercCut}{As in flowCut, numeric between 0-1 the maximum percentage of
-event that will be removed form the data.Applies to signal cleaning.}
+\item{MaxPercCut}{Maximum proportion of events that flowCut is allowed to
+remove. Default is 0.5.}
 
-\item{UseOnlyWorstChannels}{As in flowCut, logical, automated detection of the
-worst channel that will be used for cleaning.Applies to signal cleaning.}
+\item{UseOnlyWorstChannels}{Logical passed to flowCut indicating whether
+cleaning should be based on automatically detected worst channels.}
 
-\item{AllowFlaggedRerun}{as in flowCut, logical, specify if flowCut will run}
+\item{AllowFlaggedRerun}{Logical passed to flowCut indicating whether
+flagged files can be analyzed a second time.}
 
-\item{AlwaysClean}{as in flowCut, logical. The file will be cleaned even if
-it has a relatively stable signal. The segments that are 7 SD away
-from the mean of all segments are removed.Applies to signal cleaning.}
+\item{AlwaysClean}{Logical passed to flowCut indicating whether cleaning
+should also be performed for relatively stable files.}
 
-\item{...}{Additional arguments to pass to flowcut.Applies to signal cleaning.}
+\item{...}{Additional arguments passed to the signal-cleaning procedure.}
 }
 \value{
-Cleaned, untransformed flow frame if arcsine_transform argument
-set to TRUE, otherwise transformed flow frame is returned. Save plots
-with prefix "_beadNorm_flowAI.png" and "flowCutCleaned.png" to out_dir
-if parameter to_plot set to "All" or "Flagged Only".
+A character vector containing the paths to the cleaned FCS files.
 }
 \description{
-Cleans the flow rate using functions from flowAI package and
-the signal using flowCut package.
+Cleans abnormal flow-rate regions and unstable signal regions in cytometry
+data using flowAI-based flow-rate quality control and flowCut-based signal
+cleaning.
 }
 \examples{
-# Set and create the directory where cleaned fcs files will be saved
-clean_dir <- file.path(dir, "Cleaned")
+fcs_file <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
 
-# Define which files will be cleaned
-files <- list.files(bead_norm_dir,
-                   ignore.case = TRUE,
-                   pattern = "_beadNorm.fcs$",
-                   full.names = TRUE)
-
-# Clean files
-clean_files(files, cores = 1,
-           out_dir = clean_dir,
-           to_plot = "All",
-           data_type = "MC",
-           Segment = 1000,
-           arcsine_transform = TRUE,
-           non_used_bead_ch = "140")
+clean_files(
+  files = fcs_file,
+  cores = 1,
+  to_plot = "None",
+  data_type = "MC",
+  out_dir = file.path(tempdir(), "Cleaned")
+)
 
 }

@@ -4,7 +4,7 @@
 \alias{file_outlier_detection}
 \title{Detects outliers based on sample quality scores}
 \usage{
-file_outlier_detection(scores, out_dir = NULL, sd)
+file_outlier_detection(scores, out_dir = NULL, sd = 3)
 }
 \arguments{
 \item{scores}{List of scaled scores per acquisition batch or data frame
@@ -25,4 +25,27 @@ plots and save .png for Quality AOF scores for all files.
 Detects outlier files based on sample quality scores,
 generates plot for outlier and .csv file which indicates which fcs files
 could be discarded from further analysis.
+}
+\examples{
+scores <- data.frame(
+  sample_scores = c(
+    0.5,
+    0.8,
+    0.6,
+    4.5
+  ),
+  row.names = c(
+    "sample1.fcs",
+    "sample2.fcs",
+    "sample3.fcs",
+    "sample4.fcs"
+  )
+)
+
+quality_scores <- file_outlier_detection(
+  scores = scores,
+  sd = 3,
+  out_dir = file.path(tempdir(), "Quality_Control")
+)
+
 }

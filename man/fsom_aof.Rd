@@ -7,7 +7,7 @@
 fsom_aof(
   fcs_files,
   phenotyping_markers,
-  markers_to_score,
+  markers_to_score = NULL,
   nCells = length(fcs_files) * 10000,
   xdim = 10,
   ydim = 10,
@@ -72,4 +72,29 @@ fsom object
 }
 \description{
 Builds FlowSOM object
+}
+\examples{
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
+
+fsom <- fsom_aof(
+  fcs_files = fcs_files,
+  phenotyping_markers = c(
+    "CD",
+    "HLA",
+    "IgD",
+    "TCR",
+    "Siglec",
+    "Ir",
+    "Viability"
+  ),
+  nClus = 10,
+  to_plot = FALSE,
+  seed = 2,
+  out_dir = file.path(tempdir(), "Quality_Control")
+)
+
 }

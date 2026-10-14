@@ -2,11 +2,11 @@
 % Please edit documentation in R/bead_normalize.R
 \name{baseline_file}
 \alias{baseline_file}
-\title{Creates baseline file for bead normalization}
+\title{Create a baseline file for bead normalization}
 \usage{
 baseline_file(
   fcs_files,
-  beads = "dvs",
+  beads = c(89, 115, 140, 159, 175, 209),
   to_plot = FALSE,
   out_dir = getwd(),
   k = 80,
@@ -15,49 +15,47 @@ baseline_file(
 )
 }
 \arguments{
-\item{fcs_files}{Character, path to fcs files to be normalized.}
+\item{fcs_files}{Character vector containing paths to the FCS files used
+to create the reference.}
 
-\item{beads}{Character, as in CATALYST::normCytof, "dvs"
-(for bead masses 140, 151, 153 ,165, 175)
-or "beta" (for bead masses 139, 141, 159, 169, 175)
-or a numeric vector of masses. Default is set to "dvs".}
+\item{beads}{Numeric vector specifying the bead masses used for
+normalization, as in \code{CATALYST::normCytof}. Default is
+\code{c(89, 115, 140, 159, 175, 209)}.}
 
-\item{to_plot}{Logical, indicates if plots should be generated,
-default set to FALSE}
+\item{to_plot}{Logical indicating whether diagnostic plots should be
+generated. Default is \code{FALSE}.}
 
-\item{out_dir}{Character, pathway to where the plots should be saved,
-only if argument to_plot = TRUE, default is set to working directory.}
+\item{out_dir}{Character specifying the directory where plots should be
+saved when \code{to_plot = TRUE}. Default is the working directory.}
 
-\item{k}{The same as in CATALYST::normCytof, integer width of the
-median window used for bead smoothing (affects visualizations only).}
+\item{k}{Integer specifying the width of the median window used for bead
+smoothing, as in \code{CATALYST::normCytof}. Default is 80.}
 
-\item{ncells}{number of cells to be aggregated per each file, defaults is
-set to 25000 per file.}
+\item{ncells}{Number of cells sampled from each FCS file to construct the
+reference flow frame. Default is 25000 cells per file.}
 
-\item{...}{Additional arguments to pass to CATALYST::normCytof.}
+\item{...}{Additional arguments passed to \code{CATALYST::normCytof}.}
 }
 \value{
-Returns reference, aggregated flow frame.
+A \code{flowFrame} containing the aggregated reference cells used for
+bead normalization.
 }
 \description{
-Creates the reference flow frame for which mean beads
-values will be computed and used during the normalization.
+Creates a reference flow frame from multiple FCS files. Mean bead
+intensities from this reference are used for subsequent bead normalization.
 }
 \examples{
-# set input directory (pathway to the files that are going to be normalized)
-raw_data_dir <- file.path(dir, "RawFiles")
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# set a directory where bead-normalized fcs files and plots will be saved
-bead_norm_dir <- file.path(dir, "BeadNorm")
-
-# define full pathway to the files that you want to normalize
-files <- list.files(raw_data_dir,
-                    pattern = ".FCS$",
-                    full.names = TRUE)
-
-# create baseline file to which all the files will be normalized
 set.seed(2)
-ref_sample <- baseline_file(fcs_files = files,
-                            beads = "dvs",
-                            out_dir = bead_norm_dir)
+
+ref_file <- baseline_file(
+  fcs_files = fcs_files,
+  out_dir = file.path(tempdir(), "BeadNorm")
+)
+
 }

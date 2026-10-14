@@ -30,34 +30,22 @@
 #' @param ... Additional parameters to pass to flowDensity::deGate()
 #'
 #' @examples
-#' # Set input directory
-#' aggregate_dir <- file.path(dir, "Aggregated")
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#' # List files for gating
-#' files <- list.files(path = aggregate_dir,
-#'                     pattern = ".fcs$",
-#'                     full.names = TRUE)
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
 #'
-#' # Create directory to store plot
-#' gate_dir <- file.path(getwd(), "Gated")
-#' if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-#'
-#' # Gate the files and plot the gating strategy for each file
-#' n_plots <- 1
-#' png(file.path(gate_dir, paste0("gating.png")),
-#'     width = n_plots * 300, height = length(files) * 300)
-#' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-#'
-#' for (file in files){
-#'
-#'  ff <- flowCore::read.FCS(filename = file,
-#'                           transformation = FALSE)
-#'
-#'  ff <- gate_intact_cells(flow_frame = ff,
-#'                          file_name = basename(file), save_gated_flow_frame = TRUE)
-#'}
-#'
-#'dev.off()
+#' ff_intact <- gate_intact_cells(
+#'   flow_frame = ff,
+#'   file_name = basename(fcs_file),
+#'   save_gated_flow_frame = FALSE
+#' )
 #'
 #' @export
 #'
@@ -81,10 +69,8 @@ gate_intact_cells <- function(flow_frame,
 
   ff <- flow_frame
 
-  if (is.null(file_name)){
+  if (is.null(file_name)) {
     file_name <- ff@description$FIL
-  } else {
-    file_name
   }
 
   if(arcsine_transform == TRUE){
@@ -166,35 +152,23 @@ gate_intact_cells <- function(flow_frame,
 #' @param ... Additional arguments to pass to flowDensity::plotDens().
 #'
 #' @examples
-#' #' # Set input directory
-#' aggregate_dir <- file.path(dir, "Aggregated")
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#' # List files for gating
-#' files <- list.files(path = aggregate_dir,
-#'                     pattern = ".fcs$",
-#'                     full.names = TRUE)
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
 #'
-#' # Create directory to store plot
-#' gate_dir <- file.path(getwd(), "Gated")
-#' if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-#'
-#' # Gate the files and plot the gating strategy for each file
-#' n_plots <- 1
-#' png(file.path(gate_dir, paste0("gating.png")),
-#'     width = n_plots * 300, height = length(files) * 300)
-#' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-#'
-#' for (file in files){
-#'
-#'  ff <- flowCore::read.FCS(filename = file,
-#'                           transformation = FALSE)
-#'
-#'  ff <- gate_singlet_cells(flow_frame = ff,
-#'                           channels = "Event_length",
-#'                          file_name = basename(file), save_gated_flow_frame = TRUE)
-#'}
-#'
-#'dev.off()
+#' ff_singlets <- gate_singlet_cells(
+#'   flow_frame = ff,
+#'   channels = "Event_length",
+#'   file_name = basename(fcs_file),
+#'   save_gated_flow_frame = FALSE
+#' )
 #'
 #' @export
 #'
@@ -203,7 +177,7 @@ gate_singlet_cells <- function(flow_frame,
                                file_name = NULL,
                                channels = "Event_length",
                                arcsine_transform = TRUE,
-                               save_gated_flow_frame = NULL,
+                               save_gated_flow_frame = FALSE,
                                suffix = "_singlets_gated",
                                n_mad = 2,
                                out_dir = NULL,
@@ -214,10 +188,8 @@ gate_singlet_cells <- function(flow_frame,
     stop("flow_frame must be a flow frame" )
   }
 
-  if (is.null(file_name)){
+  if (is.null(file_name)) {
     file_name <- flow_frame@description$FIL
-  } else {
-    file_name
   }
 
   if(arcsine_transform == TRUE){
@@ -265,10 +237,10 @@ gate_singlet_cells <- function(flow_frame,
 #' @param viability_channel Character, the channel name used for viability staining
 #' @param tinypeak_removal_viability Numeric from 0-1, as in deGate to exclude/include
 #' tiny peaks in the tail of the density distribution curve for both viability channel
-#' @param tinypeak_removal_Iridium The same as tinypeak_removal_viability but for
-#' the head and tail of the density distribution curve in Iridium channel
-#' @param alpha_viability Numeric, 0-1, as in deGate specify the significance of change
-#' in the slope of viability channel
+#' @param alpha_viability Numeric, significance threshold for detecting
+#' changes in the viability channel density curve. Default is 0.1.
+#' @param tinypeak_removal_Iridium Numeric between 0 and 1, controls
+#' tiny peak removal in the Iridium density curve. Default is 0.8.
 #' @param alpha_Iridium The same as in alpha_viability but for the Iridium
 #' @param arcsine_transform Logical, if the data should be transformed with
 #' arcsine transformation and cofactor 5.
@@ -281,37 +253,23 @@ gate_singlet_cells <- function(flow_frame,
 #' @param ... Arguments to pass to flowDensity::plotDens().
 #'
 #' @examples
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#' #' Set input directory
-#' aggregate_dir <- file.path(dir, "Aggregated")
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
 #'
-#' # List files for gating
-#' files <- list.files(path = aggregate_dir,
-#'                     pattern = ".fcs$",
-#'                     full.names = TRUE)
-#'
-#' # Create directory to store plot
-#' gate_dir <- file.path(getwd(), "Gated")
-#' if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-#'
-#' # Gate the files and plot the gating strategy for each file
-#' n_plots <- 1
-#' png(file.path(gate_dir, paste0("gating.png")),
-#' width = n_plots * 300,
-#' height = length(files) * 300)
-#' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-#'
-#' for (file in files){
-#'
-#'  ff <- flowCore::read.FCS(filename = file,
-#'                           transformation = FALSE)
-#'
-#'  ff <- gate_live_cells(flow_frame = ff,
-#'                        viability_channel = "Pt195Di", save_gated_flow_frame = TRUE,
-#'                        file_name = basename(file))
-#'}
-#'
-#'dev.off()
+#' ff_live <- gate_live_cells(
+#'   flow_frame = ff,
+#'   viability_channel = "Pt195Di",
+#'   file_name = basename(fcs_file),
+#'   save_gated_flow_frame = FALSE
+#' )
 #'
 #' @export
 #'
@@ -335,10 +293,8 @@ gate_live_cells <- function(flow_frame,
 
   ff <- flow_frame
 
-  if (is.null(file_name)){
+  if (is.null(file_name)) {
     file_name <- ff@description$FIL
-  } else {
-    file_name
   }
 
   if(arcsine_transform == TRUE){
@@ -406,7 +362,7 @@ gate_live_cells <- function(flow_frame,
 
   if(save_gated_flow_frame){
 
-    .save_flowframe(flow_frame, out_dir, suffix, file_name)
+    .save_flowframe(ff, out_dir, suffix, file_name)
   }
 
   return(ff)
@@ -425,13 +381,15 @@ gate_live_cells <- function(flow_frame,
 #' @param viability_channel Character, the channel name used for viability staining
 #' @param tinypeak_removal_viability Numeric from 0-1, as in deGate to exclude/include
 #' tiny peaks in the tail of the density distribution curve for both viability channel
-#' @param tinypeak_removal_Iridium The same as tinypeak_removal_viability but for
-#' the head and tail of the density distribution curve in Iridium channel
 #' @param alpha_viability Numeric, 0-1, as in deGate specify the significance of change
 #' in the slope of viability channel
-#' @param alpha_Iridium The same as in alpha_viability but for the Iridium
 #' @param arcsine_transform Logical, if the data should be transformed with
 #' arcsine transformation and cofactor 5.
+#' @param eosinophil_channel Character, channel used to identify eosinophils.
+#' @param eosinophil_gate Numeric or NULL, fixed threshold for the eosinophil
+#' channel. If NULL (default), the threshold is determined automatically.
+#' @param eosinophil_adjustment Numeric, adjustment added to the automatically
+#' determined eosinophil threshold. Default is 0.
 #' @param save_gated_flow_frame Logical, if gated flow frame should be saved.
 #' Only cells falling into intact cell region will be saved. Default set to FALSE.
 #' @param suffix Character, suffix placed in the name of saved fcs file, only
@@ -441,38 +399,24 @@ gate_live_cells <- function(flow_frame,
 #' @param ... Arguments to pass to flowDensity::plotDens().
 #'
 #' @examples
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#' #' Set input directory
-#' aggregate_dir <- file.path(dir, "Aggregated")
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
 #'
-#' # List files for gating
-#' files <- list.files(path = aggregate_dir,
-#'                     pattern = ".fcs$",
-#'                     full.names = TRUE)
-#'
-#' # Create directory to store plot
-#' gate_dir <- file.path(getwd(), "Gated")
-#' if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-#'
-#' # Gate the files and plot the gating strategy for each file
-#' n_plots <- 1
-#' png(file.path(gate_dir, paste0("gating.png")),
-#' width = n_plots * 300,
-#' height = length(files) * 300)
-#' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-#'
-#' for (file in files){
-#'
-#'  ff <- flowCore::read.FCS(filename = file,
-#'                           transformation = FALSE)
-#'
-#'  ff <- gate_live_cells(flow_frame = ff,
-#'                        viability_channel = "Pt195Di", save_gated_flow_frame = TRUE,
-#'                        file_name = basename(file))
-#'}
-#'
-#'dev.off()
-#'
+#' ff_live <- gate_live_cells_update(
+#'   flow_frame = ff,
+#'   viability_channel = "Pt195Di",
+#'   eosinophil_channel = "In113Di",
+#'   file_name = basename(fcs_file),
+#'   save_gated_flow_frame = FALSE
+#' )
 #' @export
 #'
 #' @return An untransformed flow frame with live cells only
@@ -496,10 +440,8 @@ gate_live_cells_update <- function(flow_frame,
 
   ff <- flow_frame
 
-  if (is.null(file_name)){
+  if (is.null(file_name)) {
     file_name <- ff@description$FIL
-  } else {
-    file_name
   }
 
   if(arcsine_transform == TRUE){
@@ -565,7 +507,7 @@ gate_live_cells_update <- function(flow_frame,
 
   if(save_gated_flow_frame){
 
-    .save_flowframe(flow_frame, out_dir, suffix, file_name)
+    .save_flowframe(ff, out_dir, suffix, file_name)
   }
 
   return(ff)
@@ -659,6 +601,8 @@ gate_live_cells_update <- function(flow_frame,
 #' @param file_name Character, the file name used for saving the flow frame
 #' (if save_gated_flow_frame = TRUE) and for plotting, if NULL (default)
 #' the file name stored in keyword FIL will be used.
+#' @param CD45_channel Character, channel used for CD45+ cell gating.
+#' @param CD45_threshold Numeric, cutoff for identifying CD45+ cells.
 #' @param arcsine_transform Logical, if the data should be transformed
 #' with arcsine transformation and cofactor 5. If FALSE the data won't be
 #' transformed, thus transformed flow frame should be used if needed.
@@ -669,6 +613,24 @@ gate_live_cells_update <- function(flow_frame,
 #' if save_gated_flow_frame = TRUE.Defult is "_intact_gated".
 #' @param out_dir Character, pathway to where the files should be saved,
 #' if NULL (default) files will be saved to file.path(getwd(), Gated).
+#' @param ... Additional arguments (usage depends on the function implementation).
+#' @examples
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
+#'
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
+#'
+#' ff_cd45 <- gate_CD45pos_cells(
+#'   flow_frame = ff,
+#'   file_name = basename(fcs_file),
+#'   save_gated_flow_frame = FALSE
+#' )
 #'
 #' @export
 #'
@@ -690,10 +652,8 @@ gate_CD45pos_cells <- function(flow_frame,
 
   ff <- flow_frame
 
-  if (is.null(file_name)){
+  if (is.null(file_name)) {
     file_name <- ff@description$FIL
-  } else {
-    file_name
   }
 
   if(arcsine_transform == TRUE){
@@ -757,6 +717,24 @@ gate_CD45pos_cells <- function(flow_frame,
 #' if NULL (default) files will be saved to file.path(getwd(), Gated).
 #' @param DNA1Threshold Threshold for the DNA1 gate for the bead gating
 #' @param TCRThreshold Threshold for the TCR gate for the bead gating
+#' @param ... Additional arguments passed to the function.
+#' @examples
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
+#'
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
+#'
+#' ff_no_beads <- gate_beads(
+#'   flow_frame = ff,
+#'   file_name = basename(fcs_file),
+#'   save_gated_flow_frame = FALSE
+#' )
 #'
 #' @export
 #'
@@ -778,10 +756,8 @@ gate_beads <- function(flow_frame,
 
   ff <- flow_frame
 
-  if (is.null(file_name)){
+  if (is.null(file_name)) {
     file_name <- ff@description$FIL
-  } else {
-    file_name
   }
 
   if(arcsine_transform == TRUE){
@@ -838,7 +814,6 @@ gate_beads <- function(flow_frame,
 #' the file name stored in keyword FIL will be used.
 #' @param channels character, channels name to be used for gating, default is
 #' to Event_length.
-#' @param n_mad Numeric, number of MADs to detect outliers.Default set to 2.
 #' @param arcsine_transform Logical, if the data should be transformed
 #' with arcsine transformation and cofactor 5. If FALSE the data won't be
 #' transformed, thus transformed flow frame should be used if needed.
@@ -852,42 +827,28 @@ gate_beads <- function(flow_frame,
 #' @param ... Additional arguments to pass to flowDensity::plotDens().
 #'
 #' @examples
-#' #' # Set input directory
-#' aggregate_dir <- file.path(dir, "Aggregated")
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#' # List files for gating
-#' files <- list.files(path = aggregate_dir,
-#'                     pattern = ".fcs$",
-#'                     full.names = TRUE)
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
 #'
-#' # Create directory to store plot
-#' gate_dir <- file.path(getwd(), "Gated")
-#' if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-#'
-#' # Gate the files and plot the gating strategy for each file
-#' n_plots <- 1
-#' png(file.path(gate_dir, paste0("gating.png")),
-#'     width = n_plots * 300, height = length(files) * 300)
-#' layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-#'
-#' for (file in files){
-#'
-#'  ff <- flowCore::read.FCS(filename = file,
-#'                           transformation = FALSE)
-#'
-#'  ff <- gate_singlet_cells_XTPro(flow_frame = ff,
-#'                                 channels = "Event_length",
-#'                                 file_name = basename(file),
-#'                                 save_gated_flow_frame = TRUE)
-#'}
-#'
-#'dev.off()
+#' ff_singlets <- gate_singlet_cells_XTPro(
+#'   flow_frame = ff,
+#'   file_name = basename(fcs_file),
+#'   save_gated_flow_frame = FALSE
+#' )
 #'
 #' @export
 #'
 #' @return An untransformed flow frame with singlets only
 gate_singlet_cells_XTPro <- function (flow_frame, file_name = NULL, channels = "Event_length",
-                                      arcsine_transform = TRUE, save_gated_flow_frame = NULL,
+                                      arcsine_transform = TRUE, save_gated_flow_frame = FALSE,
                                       suffix = "_singlets_gated", out_dir = NULL, ...)
 {
   if (!is(flow_frame, "flowFrame")) {
@@ -895,8 +856,6 @@ gate_singlet_cells_XTPro <- function (flow_frame, file_name = NULL, channels = "
   }
   if (is.null(file_name)) {
     file_name <- flow_frame@description$FIL
-  }else {
-    file_name
   }
   if (arcsine_transform == TRUE) {
     flow_frame_t <- flowCore::transform(flow_frame, flowCore::transformList(flowCore::colnames(flow_frame)[grep("Di",
@@ -931,10 +890,10 @@ gate_singlet_cells_XTPro <- function (flow_frame, file_name = NULL, channels = "
                                     plot = TRUE, main = "",
                                     ...)
 {
-  values <- as.numeric(names(which((table(exprs(flow_frame)[,"Event_length"])/nrow(exprs(flow_frame))*100)>1))) #Keep values for which >1% of the cells have this value
+  values <- as.numeric(names(which((table(flowCore::exprs(flow_frame)[,"Event_length"])/nrow(flowCore::exprs(flow_frame))*100)>1))) #Keep values for which >1% of the cells have this value
   boundaries <- c(0, max(values)+0.5)
-  selection <- (exprs(flow_frame)[, "Event_length"] >  boundaries[1] &
-                  exprs(flow_frame)[, "Event_length"] <  boundaries[2])
+  selection <- (flowCore::exprs(flow_frame)[, "Event_length"] >  boundaries[1] &
+                  flowCore::exprs(flow_frame)[, "Event_length"] <  boundaries[2])
 
   percentage <- (sum(selection)/length(selection)) * 100
   if (plot) {

@@ -40,10 +40,31 @@ if save_gated_flow_frame = TRUE.Defult is "_intact_gated".}
 \item{DNA1Threshold}{Threshold for the DNA1 gate for the bead gating}
 
 \item{TCRThreshold}{Threshold for the TCR gate for the bead gating}
+
+\item{...}{Additional arguments passed to the function.}
 }
 \value{
 An untransformed flow frame with non-bead events only
 }
 \description{
 Performs gating of beads using a fixed cutoff.
+}
+\examples{
+fcs_file <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
+
+ff <- flowCore::read.FCS(
+  fcs_file,
+  transformation = FALSE
+)
+
+ff_no_beads <- gate_beads(
+  flow_frame = ff,
+  file_name = basename(fcs_file),
+  save_gated_flow_frame = FALSE
+)
+
 }

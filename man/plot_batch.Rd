@@ -24,6 +24,8 @@ plot_batch(
 
 \item{files_after_norm}{Character, full path to the normalized fcs_files.}
 
+\item{batch_labels}{Character vector containing the batch label for each FCS file.}
+
 \item{batch_pattern}{Character, batch pattern to be match in the fcs file name.}
 
 \item{cores}{Number of cores to be used}
@@ -59,32 +61,34 @@ save plots for batch effect in the out_dir
 Plots batch effect using UMAP and clustering markers
 }
 \examples{
-# Define files before normalization
-gate_dir <- file.path(dir, "Gated")
-files_before_norm <- list.files(gate_dir,
-                                pattern = ".fcs",
-                                full.names = T)
+files_before_norm <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# Define files after normalization
-norm_dir <- file.path(dir, "CytoNormed")
-files_after_norm <- list.files(norm_dir,
-                               pattern = ".fcs",
-                               full.names = T)
+files_after_norm <- files_before_norm
 
-# files needs to be in the same order, check and order if needed
-test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
-                 basename(files_before_norm))
+batch_labels <- paste0(
+  "Center",
+  1:4
+)
 
-batch_labels <- stringr::str_match(basename(files_before_norm), "day[0-9]*")[,1]
-
-# Plot batch effect
 set.seed(789)
-plot_batch(files_before_norm = files_before_norm,
-           files_after_norm = files_after_norm,
-           batch_labels = batch_labels,
-           cores = 1,
-           out_dir = norm_dir,
-           clustering_markers = c("CD", "IgD", "HLA"),
-           manual_colors = c("darkorchid4", "darkorange", "chartreuse4"))
+
+plot_batch(
+  files_before_norm = files_before_norm,
+  files_after_norm = files_after_norm,
+  batch_labels = batch_labels,
+  cores = 1,
+  clustering_markers = c(
+    "CD",
+    "HLA",
+    "IgD",
+    "TCR",
+    "Siglec"
+  ),
+  out_dir = file.path(tempdir(), "CytoNormed")
+)
 
 }

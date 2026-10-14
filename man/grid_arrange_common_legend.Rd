@@ -27,6 +27,23 @@ combained ggplot
 Plot listed plots with one common legend
 }
 \examples{
-gg_a <- grid_arrange_common_legend(plot_lists = plots, nrow = 2, ncol = 2,
-position = "right")
+p1 <- ggplot2::ggplot(
+  mtcars,
+  ggplot2::aes(x = wt, y = mpg, color = factor(cyl))
+) +
+  ggplot2::geom_point()
+
+p2 <- ggplot2::ggplot(
+  mtcars,
+  ggplot2::aes(x = hp, y = mpg, color = factor(cyl))
+) +
+  ggplot2::geom_point()
+
+combined <- grid_arrange_common_legend(
+  plot_lists = list(p1, p2),
+  nrow = 1,
+  ncol = 2,
+  position = "right"
+)
+
 }

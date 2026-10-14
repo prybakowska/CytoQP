@@ -30,9 +30,21 @@ Save splitted fcs files in out_dir.
 Split the big flow frames into smaller ones.
 }
 \examples{
-ff <- flowCore::read.FCS(list.files(path = raw_data_dir,
-pattern = ".FCS", full.names = TRUE)[1])
+fcs_file <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
 
-split_big_flowFrames(flow_frame = ff, event_per_flow_frame = 100000)
+ff <- flowCore::read.FCS(
+  fcs_file,
+  transformation = FALSE
+)
+
+split_big_flowFrames(
+  flow_frame = ff,
+  event_per_flow_frame = 100000,
+  out_dir = file.path(tempdir(), "Splitted")
+)
 
 }

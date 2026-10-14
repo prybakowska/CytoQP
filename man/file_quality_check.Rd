@@ -64,23 +64,27 @@ Next, based on Quality scores, it detects outliers across all the files,
 regarding the batch.
 }
 \examples{
-# Set input directory
-clean_dir <- file.path(dir, "Cleaned")
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# Define files for visualization
-files <- list.files(clean_dir,
-                   pattern = "_cleaned.fcs$",
-                   full.names = TRUE)
-
-# Define batch_id for each file
-file_batch_id <- stringr::str_match(basename(files),
-                                   "(day[0-9]*).*.fcs")[,2]
-
-file_quality_check(fcs_files = files,
-                  file_batch_id = file_batch_id,
-                  phenotyping_markers = c("Ir","CD", "HLA", "IgD", "Pt"),
-                  arcsine_transform = TRUE,
-                  nClus = 10,
-                  sd = 3)
+quality_scores <- file_quality_check(
+  fcs_files = fcs_files,
+  phenotyping_markers = c(
+    "CD",
+    "HLA",
+    "IgD",
+    "TCR",
+    "Siglec",
+    "Ir",
+    "Viability"
+  ),
+  arcsine_transform = TRUE,
+  nClus = 10,
+  sd = 3,
+  out_dir = file.path(tempdir(), "Quality_Control")
+)
 
 }

@@ -24,3 +24,20 @@ Logical vector with TRUE values for mass channels
 \description{
 Finds all the mass channels
 }
+\examples{
+fcs_file <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
+
+ff <- flowCore::read.FCS(
+  fcs_file,
+  transformation = FALSE
+)
+
+mass_channels <- find_mass_ch(
+  flow_frame = ff
+)
+
+}

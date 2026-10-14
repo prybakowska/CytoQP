@@ -13,10 +13,22 @@
 #' @return Save splitted fcs files in out_dir.
 #'
 #' @examples
-#' ff <- flowCore::read.FCS(list.files(path = raw_data_dir,
-#' pattern = ".FCS", full.names = TRUE)[1])
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#' split_big_flowFrames(flow_frame = ff, event_per_flow_frame = 100000)
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
+#'
+#' split_big_flowFrames(
+#'   flow_frame = ff,
+#'   event_per_flow_frame = 100000,
+#'   out_dir = file.path(tempdir(), "Splitted")
+#' )
 #'
 #' @export
 split_big_flowFrames <- function(flow_frame,
@@ -51,7 +63,7 @@ split_big_flowFrames <- function(flow_frame,
 }
 
 
-#'Calculates breaks for flow frame splitting
+#' @noRd
 .make_breaks <- function(event_per_flow_frame, total_events){
   breaks <- .split_flowFrames(seq_len(total_events),
                               event_per_flow_frame)
@@ -66,6 +78,7 @@ split_big_flowFrames <- function(flow_frame,
 #'Code from Annelies Emmaneel (2021). PeacoQC:
 #'Peak-based selection of high quality cytometry data. R package
 #'version 1.4.0.
+#' @noRd
 .split_flowFrames <- function(vec, seg.length) {
   starts=seq(1, length(vec), by=seg.length)
   ends  = starts + seg.length - 1

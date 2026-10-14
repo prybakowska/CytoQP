@@ -29,6 +29,11 @@ the file name stored in keyword FIL will be used,}
 
 \item{viability_channel}{Character, the channel name used for viability staining}
 
+\item{eosinophil_channel}{Character, channel used to identify eosinophils.}
+
+\item{eosinophil_gate}{Numeric or NULL, fixed threshold for the eosinophil
+channel. If NULL (default), the threshold is determined automatically.}
+
 \item{tinypeak_removal_viability}{Numeric from 0-1, as in deGate to exclude/include
 tiny peaks in the tail of the density distribution curve for both viability channel}
 
@@ -41,6 +46,9 @@ arcsine transformation and cofactor 5.}
 \item{save_gated_flow_frame}{Logical, if gated flow frame should be saved.
 Only cells falling into intact cell region will be saved. Default set to FALSE.}
 
+\item{eosinophil_adjustment}{Numeric, adjustment added to the automatically
+determined eosinophil threshold. Default is 0.}
+
 \item{suffix}{Character, suffix placed in the name of saved fcs file, only
 if save_gated_flow_frame = TRUE.Defult is "_intact_gated".}
 
@@ -48,11 +56,6 @@ if save_gated_flow_frame = TRUE.Defult is "_intact_gated".}
 if NULL (default) files will be saved to file.path(getwd(), Gated).}
 
 \item{...}{Arguments to pass to flowDensity::plotDens().}
-
-\item{tinypeak_removal_Iridium}{The same as tinypeak_removal_viability but for
-the head and tail of the density distribution curve in Iridium channel}
-
-\item{alpha_Iridium}{The same as in alpha_viability but for the Iridium}
 }
 \value{
 An untransformed flow frame with live cells only
@@ -61,36 +64,22 @@ An untransformed flow frame with live cells only
 Performs gating of live cells using flowDensity::deGate
 }
 \examples{
+fcs_file <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
 
-#' Set input directory
-aggregate_dir <- file.path(dir, "Aggregated")
+ff <- flowCore::read.FCS(
+  fcs_file,
+  transformation = FALSE
+)
 
-# List files for gating
-files <- list.files(path = aggregate_dir,
-                    pattern = ".fcs$",
-                    full.names = TRUE)
-
-# Create directory to store plot
-gate_dir <- file.path(getwd(), "Gated")
-if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-
-# Gate the files and plot the gating strategy for each file
-n_plots <- 1
-png(file.path(gate_dir, paste0("gating.png")),
-width = n_plots * 300,
-height = length(files) * 300)
-layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-
-for (file in files){
-
- ff <- flowCore::read.FCS(filename = file,
-                          transformation = FALSE)
-
- ff <- gate_live_cells(flow_frame = ff,
-                       viability_channel = "Pt195Di", save_gated_flow_frame = TRUE,
-                       file_name = basename(file))
-}
-
-dev.off()
-
+ff_live <- gate_live_cells_update(
+  flow_frame = ff,
+  viability_channel = "Pt195Di",
+  eosinophil_channel = "In113Di",
+  file_name = basename(fcs_file),
+  save_gated_flow_frame = FALSE
+)
 }

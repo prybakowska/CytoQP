@@ -21,24 +21,6 @@ extract_pctgs_msi_per_flowsom(
   save_flowsom_result = TRUE,
   impute_0_values = TRUE
 )
-
-extract_pctgs_msi_per_flowsom(
-  files,
-  nCells = 50000,
-  phenotyping_markers = c("CD", "HLA", "IgD"),
-  functional_markers = NULL,
-  xdim = 10,
-  ydim = 10,
-  n_metaclusters = 35,
-  out_dir = NULL,
-  seed = NULL,
-  arcsine_transform = TRUE,
-  save_matrix = TRUE,
-  file_name = NULL,
-  transform_list = NULL,
-  save_flowsom_result = TRUE,
-  impute_0_values = TRUE
-)
 }
 \arguments{
 \item{files}{Pathway to the files}
@@ -87,112 +69,39 @@ saved. If TRUE (default) files will be saved in out_dir.}
 
 \item{impute_0_values}{Logical, if 0 values should be imputed for MSI values
 if NAs are present.}
-
-\item{file_list}{List, pathway to the files before and after normalization}
 }
 \value{
-list of matrices that contain calculation for
-cl_pctgs (cluster percentages), mcl_pctgs (metaclusters percentages),
-cl_msi (cluster MSIs for selected markers), mcl_msi (metaclusters MSI
-for selected markers). If save_matrix = TRUE, saves this matrices in out_dir.
-FlowSOM objects for normalized and unnormalized data,
-if save_flowsom_result set to TRUE.
-
-matrix that contain calculation for
-cl_pctgs (cluster percentages), mcl_pctgs (metaclusters percentages),
-cl_msi (cluster MSIs for selected markers), mcl_msi (metaclusters MSI
-for selected markers). If save_matrix = TRUE, saves matrix in out_dir.
-FlowSOM objects for normalized and unnormalized data,
-if save_flowsom_result set to TRUE.
+A list containing cluster frequencies, metacluster frequencies,
+cluster MSIs, and metacluster MSIs.
 }
 \description{
 Performs FlowSOM clustering and extracts cluster and metacluster
 frequency and MSI. It is imputing 0 values when NAs are detected in MSI for
 clusters and metaclusters.
-
-Performs FlowSOM clustering and extracts cluster and metacluster
-frequency and MSI. It is imputing 0 values when NAs are detected in MSI for
-clusters and metaclusters.
 }
 \examples{
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# Define files before normalization
-gate_dir <- file.path(dir, "Gated")
-files_before_norm <- list.files(gate_dir,
-                                pattern = ".fcs",
-                                full.names = T)
-
-# Define files after normalization
-norm_dir <- file.path(dir, "CytoNormed")
-files_after_norm <- list.files(norm_dir,
-                               pattern = ".fcs",
-                               full.names = T)
-
-# files needs to be in the same order, check and order if needed
-test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
-                 basename(files_before_norm))
-
-batch_labels <- stringr::str_match(basename(files_before_norm), "day[0-9]*")[,1]
-
-mx <- extract_pctgs_msi_per_flowsom(files_after_norm = files_after_norm,
-                                    files_before_norm = files_before_norm,
-                                    nCells = 50000,
-                                    phenotyping_markers = c("CD", "HLA", "IgD"),
-                                    functional_markers = c("MIP", "MCP", "IL",
-                                                           "IFNa", "TNF", "TGF",
-                                                           "Gr"),
-                                    xdim = 10,
-                                    ydim = 10,
-                                    n_metaclusters = 35,
-                                    out_dir = norm_dir,
-                                    arcsine_transform = TRUE,
-                                    save_matrix = TRUE,
-                                    seed = 343)
-
-
-# Define files before normalization
-gate_dir <- file.path(getwd(), "Gated")
-files_before_norm <- list.files(gate_dir,pattern = ".fcs",
-                              full.names = TRUE)
-
-# Define files after normalization
-norm_dir <- file.path(getwd(), "CytoNormed")
-files_after_norm <- list.files(norm_dir, pattern = ".fcs",
-                              full.names = TRUE)
-
-# files needs to be in the same order, check and order if needed
-test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
-                 basename(files_before_norm))
-
-batch_labels <- stringr::str_match(basename(files_before_norm), "day[0-9]*")[,1]
-
-# Extract cell frequency and MSI
-
-files_list <- list("after" = files_after_norm,
-                   "before" = files_before_norm)
-
-results <- list()
-for (name in names(files_list)){
-
-files <- files_list[[name]]
-mx <- extract_pctgs_msi_per_flowsom(files = files,
-                                     nCells = 50000,
-                                     phenotyping_markers =
-                                       c("CD", "HLA", "IgD"),
-                                     functional_markers =
-                                       c("MIP", "MCP", "IL",
-                                         "IFNa", "TNF", "TGF",
-                                         "Gr"),
-                                     xdim = 10, ydim = 10,
-                                     n_metaclusters = 35,
-                                     out_dir = norm_dir,
-                                     arcsine_transform = TRUE,
-                                     save_matrix = TRUE,
-                                     file_name = name,
-                                     seed = 343,
-                                     impute_0_values = TRUE)
-results[[name]] <- mx
-
-}
+mx <- extract_pctgs_msi_per_flowsom(
+  files = fcs_files,
+  nCells = 1000,
+  phenotyping_markers = c(
+    "CD",
+    "HLA",
+    "IgD"
+  ),
+  functional_markers = NULL,
+  xdim = 5,
+  ydim = 5,
+  n_metaclusters = 5,
+  save_matrix = FALSE,
+  save_flowsom_result = FALSE,
+  seed = 343,
+  out_dir = file.path(tempdir(), "CytoNormed")
+)
 
 }

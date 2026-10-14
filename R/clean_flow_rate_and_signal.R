@@ -1,67 +1,61 @@
-#' Clean flow rate and signal
+#' Clean Flow Rate and Signal
 #'
-#' @description Cleans the flow rate using functions from flowAI package and
-#' the signal using flowCut package.
+#' @description
+#' Cleans abnormal flow-rate regions and unstable signal regions in cytometry
+#' data using flowAI-based flow-rate quality control and flowCut-based signal
+#' cleaning.
 #'
-#' @param files Character vector or list with the paths of the raw files.
-#' @param cores Number of cores to be used.
-#' @param to_plot Character variable that indicates if plots should be generated.
-#' The default is "All", which generates plots for flow rate and all channels.
-#' Other options are "Flagged Only", plots the flow rate and channels that were
-#' spotted with flowCut as incorrect and "None", does not plots anything.
-#' @param clean_flow_rate Logical, if flow rate should be cleaned.
-#' @param clean_signal, Logical, if signal should be cleaned.
-#' @param out_dir Character, pathway to where the plots should be saved,
-#' only if argument to_plot = TRUE, default is set to file.path(getwd(), Cleaned).
-#' @param alpha numeric, as in flowAI::flow_auto_qc. The statistical
-#' significance level used to accept anomalies. The default value is 0.01.
-#' Applies to flow rate.
-#' @param data_type Character, if MC (mass cytometry) of FC (flow cytometry)
-#' data are analyzed.
-#' @param channels_to_clean Character vector of the channels that needs
-#' to be cleaned.Applies to signal cleaning.
-#' @param Segment As in flowCut, an integer value that specifies the
-#' number of events in each segment to be analyzed.Default is 1000 events.
-#' @param arcsine_transform Logical, if the data should be transformed with
-#' arcsine transformation and cofactor 5, default is set to TRUE.
-#' Applies to signal cleaning.
-#' @param non_used_bead_ch Character vector, bead channels that does not contain
-#' any marker information, thus do not need to be cleaned and used
-#' for further analysis.Applies to signal cleaning.
-#' @param MaxPercCut As in flowCut, numeric between 0-1 the maximum percentage of
-#' event that will be removed form the data.Applies to signal cleaning.
-#' @param UseOnlyWorstChannels As in flowCut, logical, automated detection of the
-#' worst channel that will be used for cleaning.Applies to signal cleaning.
-#' @param AllowFlaggedRerun as in flowCut, logical, specify if flowCut will run
-#  second time in case the file was flagged.Applies to signal cleaning.
-#' @param AlwaysClean as in flowCut, logical. The file will be cleaned even if
-#' it has a relatively stable signal. The segments that are 7 SD away
-#' from the mean of all segments are removed.Applies to signal cleaning.
-#' @param ... Additional arguments to pass to flowcut.Applies to signal cleaning.
+#' @param files Character vector or list containing paths to FCS files.
+#' @param cores Number of cores to use. Default is 1.
+#' @param to_plot Character specifying which diagnostic plots should be
+#' generated. Options are \code{"All"}, \code{"Flagged Only"}, and
+#' \code{"None"}.
+#' @param clean_flow_rate Logical indicating whether flow-rate cleaning should
+#' be performed. Default is \code{TRUE}.
+#' @param clean_signal Logical indicating whether signal cleaning should be
+#' performed. Default is \code{TRUE}.
+#' @param out_dir Directory where cleaned FCS files and diagnostic plots are
+#' written. If \code{NULL}, a \code{"Cleaned"} directory is created in the
+#' current working directory.
+#' @param alpha Statistical significance level used for flow-rate anomaly
+#' detection. Default is 0.01.
+#' @param data_type Character specifying the cytometry data type:
+#' \code{"MC"} for mass cytometry or \code{"FC"} for flow cytometry.
+#' @param channels_to_clean Optional character vector specifying channels used
+#' for signal cleaning.
+#' @param Segment Number of events per segment used by flowCut.
+#' Default is 1000.
+#' @param arcsine_transform Logical indicating whether the data should be
+#' transformed before signal cleaning. Default is \code{TRUE}.
+#' @param non_used_bead_ch Optional character vector specifying bead channels
+#' that should be excluded from signal cleaning.
+#' @param MaxPercCut Maximum proportion of events that flowCut is allowed to
+#' remove. Default is 0.5.
+#' @param UseOnlyWorstChannels Logical passed to flowCut indicating whether
+#' cleaning should be based on automatically detected worst channels.
+#' @param AllowFlaggedRerun Logical passed to flowCut indicating whether
+#' flagged files can be analyzed a second time.
+#' @param AlwaysClean Logical passed to flowCut indicating whether cleaning
+#' should also be performed for relatively stable files.
+#' @param ... Additional arguments passed to the signal-cleaning procedure.
 #'
-#' @return Cleaned, untransformed flow frame if arcsine_transform argument
-#' set to TRUE, otherwise transformed flow frame is returned. Save plots
-#' with prefix "_beadNorm_flowAI.png" and "flowCutCleaned.png" to out_dir
-#' if parameter to_plot set to "All" or "Flagged Only".
+#' @return
+#' A character vector containing the paths to the cleaned FCS files.
 #'
 #' @examples
-#' # Set and create the directory where cleaned fcs files will be saved
-#'clean_dir <- file.path(dir, "Cleaned")
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#'# Define which files will be cleaned
-#'files <- list.files(bead_norm_dir,
-#'                    ignore.case = TRUE,
-#'                    pattern = "_beadNorm.fcs$",
-#'                    full.names = TRUE)
-#'
-#'# Clean files
-#'clean_files(files, cores = 1,
-#'            out_dir = clean_dir,
-#'            to_plot = "All",
-#'            data_type = "MC",
-#'            Segment = 1000,
-#'            arcsine_transform = TRUE,
-#'            non_used_bead_ch = "140")
+#' clean_files(
+#'   files = fcs_file,
+#'   cores = 1,
+#'   to_plot = "None",
+#'   data_type = "MC",
+#'   out_dir = file.path(tempdir(), "Cleaned")
+#' )
 #'
 #' @import ggplot2
 #'
@@ -117,229 +111,410 @@ clean_files <- function(files,
 
   # Analysis with a single core
   if (cores == 1) {
-    lapply(files, function(x) {
-      .save_bead_clean(x,
-                       to_plot = to_plot,
-                       clean_flow_rate = clean_flow_rate,
-                       clean_signal = clean_signal,
-                       out_dir = out_dir,
-                       alpha = alpha,
-                       data_type = data_type,
-                       channels_to_clean = channels_to_clean,
-                       Segment = Segment,
-                       arcsine_transform = arcsine_transform,
-                       non_used_bead_ch = non_used_bead_ch,
-                       MaxPercCut = MaxPercCut,
-                       UseOnlyWorstChannels = UseOnlyWorstChannels,
-                       AllowFlaggedRerun = AllowFlaggedRerun,
-                       AlwaysClean = AlwaysClean)})
+
+    output_files <- lapply(
+      files,
+      function(x) {
+        .save_bead_clean(
+          file = x,
+          to_plot = to_plot,
+          clean_flow_rate = clean_flow_rate,
+          clean_signal = clean_signal,
+          out_dir = out_dir,
+          alpha = alpha,
+          data_type = data_type,
+          channels_to_clean = channels_to_clean,
+          Segment = Segment,
+          arcsine_transform = arcsine_transform,
+          non_used_bead_ch = non_used_bead_ch,
+          MaxPercCut = MaxPercCut,
+          UseOnlyWorstChannels = UseOnlyWorstChannels,
+          AllowFlaggedRerun = AllowFlaggedRerun,
+          AlwaysClean = AlwaysClean,
+          ...
+        )
+      }
+    )
+
+  } else {
+
+    # Windows-compatible parallelization
+    output_files <- BiocParallel::bplapply(
+      files,
+      function(x) {
+        .save_bead_clean(
+          file = x,
+          to_plot = to_plot,
+          clean_flow_rate = clean_flow_rate,
+          clean_signal = clean_signal,
+          out_dir = out_dir,
+          alpha = alpha,
+          data_type = data_type,
+          channels_to_clean = channels_to_clean,
+          Segment = Segment,
+          arcsine_transform = arcsine_transform,
+          non_used_bead_ch = non_used_bead_ch,
+          MaxPercCut = MaxPercCut,
+          UseOnlyWorstChannels = UseOnlyWorstChannels,
+          AllowFlaggedRerun = AllowFlaggedRerun,
+          AlwaysClean = AlwaysClean,
+          ...
+        )
+      },
+      BPPARAM = BiocParallel::SnowParam(
+        workers = cores
+      )
+    )
   }
 
-  # Parallelized analysis
-  else {
-    BiocParallel::bplapply(files, function(x) {
-      .save_bead_clean(x,
-                       to_plot = to_plot,
-                       clean_flow_rate = clean_flow_rate,
-                       clean_signal = clean_signal,
-                       out_dir = out_dir,
-                       alpha = alpha,
-                       data_type = data_type,
-                       channels_to_clean = channels_to_clean,
-                       Segment = Segment,
-                       arcsine_transform = arcsine_transform,
-                       non_used_bead_ch = non_used_bead_ch,
-                       MaxPercCut = MaxPercCut,
-                       UseOnlyWorstChannels = UseOnlyWorstChannels,
-                       AllowFlaggedRerun = AllowFlaggedRerun,
-                       AlwaysClean = AlwaysClean)},
-      BPPARAM = BiocParallel::MulticoreParam(workers = cores))
-  }
-
+  return(
+    unlist(
+      output_files,
+      use.names = FALSE
+    )
+  )
 }
 
-#' Clean signal with PeacoQC
+
+
+#' Clean Signal with PeacoQC
 #'
-#' @description Cleans the signal using PeacoQC package.
+#' @description
+#' Cleans unstable signal regions in cytometry data using PeacoQC.
+#' The selected channels are transformed before quality control when
+#' \code{arcsine_transform = TRUE}, while the original untransformed events
+#' corresponding to PeacoQC good cells are written to the output FCS files.
 #'
-#' @param files Character vector or list with the paths of the raw files.
-#' @param channels_to_clean Channels that need to be cleaned
-#' @param cores Number of cores to be used.
-#' @param plot As in PeacoQC. When PeacoQC removes more than the specified
-#' percentage, an overview plot will be made of all the selected channels and
-#' the deleted measurements. If set to TRUE, the PlotPeacoQC function is run to
-#' make an overview plot of the deleted measurements, even when nothing is
-#' removed. Default is set to 20. If an increasing or decreasing trend is found,
-#' a figure will also be made except if plot is set to FALSE.
-#' @param out_dir As in PeacoQC. Directory where a new folder will be created
-#' that consists of the generated fcs files, plots and report. If set to NULL,
-#' nothing will be stored.The default folder is the working directory.
-#' @param name_dir As in PeacoQC. Name of folder that will be generated in
-#' \code{out_directory}.` The default is "PeacoQC_results".
-#' @param MAD As in PeacoQC. The MAD parameter. Default is 6. If this is
-#' increased, the algorithm becomes less strict.
-#' @param IT_limit As in PeacoQC. The IsolationTree parameter. Default is 0.55.
-#' If this is increased, the algorithm becomes less strict.
-#' @param remove_zeros If this is set to TRUE, the zero values will be removed
-#' before the peak detection step. They will not be indicated as 'bad' value.
-#' This is recommended when cleaning mass cytometry data. Default is FALSE.
-#' @param arcsine_transform Logical, if the data should be transformed with
-#' arcsine transformation and cofactor 5, default is set to TRUE.
-#' Applies to signal cleaning.
-#' @param data_type Character, if MC (mass cytometry) of FC (flow cytometry)
-#' data are analyzed.
-#' @param suffix_old Old suffix to replace with \code{suffix_new}`.
-#' @param suffix_new What to replace \code{suffix_old} with.
+#' @param files Character vector or list containing paths to FCS files.
+#' @param channels_to_clean Character vector specifying the channels used
+#' for PeacoQC signal cleaning.
+#' @param cores Number of cores to use. Default is 1.
+#' @param plot Passed to \code{PeacoQC::PeacoQC()}. Controls generation of
+#' diagnostic plots. Default is 20.
+#' @param out_dir Directory where cleaned FCS files and PeacoQC output are
+#' written. Default is the current working directory.
+#' @param name_dir Name of the PeacoQC results directory.
+#' Default is \code{"Cleaned"}.
+#' @param MAD MAD threshold used by PeacoQC. Increasing this value makes
+#' the algorithm less strict. Default is 6.
+#' @param IT_limit IsolationTree threshold used by PeacoQC. Increasing this
+#' value makes the algorithm less strict. Default is 0.6.
+#' @param remove_zeros Logical indicating whether zero values should be removed
+#' before peak detection. Default is \code{TRUE}.
+#' @param arcsine_transform Logical indicating whether the data should be
+#' transformed before PeacoQC analysis. Default is \code{TRUE}.
+#' @param data_type Character specifying the cytometry data type:
+#' \code{"MC"} for mass cytometry or \code{"FC"} for flow cytometry.
+#' @param suffix_old Character string to replace in input filenames.
+#' Default is \code{"compensated"}.
+#' @param suffix_new Character string used in cleaned output filenames.
+#' Default is \code{"cleaned"}.
 #'
-#' @return Cleaned, untransformed flow frame if arcsine_transform argument
-#' set to TRUE, otherwise transformed flow frame is returned.
+#' @return
+#' A character vector containing the paths to the cleaned FCS files.
 #'
 #' @examples
-#' # Set and create the directory where cleaned fcs files will be saved
-#'clean_dir <- file.path(dir, "Cleaned")
+#' fcs_file <- system.file(
+#'   "extdata",
+#'   "Center1_batch1.fcs",
+#'   package = "CytoQP"
+#' )
 #'
-#'# Define which files will be cleaned
-#'files <- list.files(bead_norm_dir,
-#'                    ignore.case = TRUE,
-#'                    pattern = "_beadNorm.fcs$",
-#'                    full.names = TRUE)
+#' ff <- flowCore::read.FCS(
+#'   fcs_file,
+#'   transformation = FALSE
+#' )
 #'
+#' channels_to_clean <- find_mass_ch(
+#'   ff,
+#'   value = TRUE
+#' )
 #'
-#'# Clean files
-#'clean_files_PQC(files = files, cores = 1,
-#'                cores = 1, remove_zeros = TRUE,
-#'                channels_to_clean = channelsToClean,
-#'                arcsine_transform = TRUE,
-#'                data_type = "MC")
-#'
-#' @import ggplot2
-#' @import PeacoQC
+#' files_clean <- clean_files_PQC(
+#'   files = fcs_file,
+#'   channels_to_clean = channels_to_clean,
+#'   cores = 1,
+#'   plot = FALSE,
+#'   data_type = "MC",
+#'   out_dir = file.path(tempdir(), "PeacoQC")
+#' )
 #'
 #' @export
-clean_files_PQC <- function (files, channels_to_clean,
-                             cores = 1, plot = 20, out_dir = ".", name_dir = "Cleaned",
-                             MAD=6, IT_limit=0.6, remove_zeros=TRUE,
-                             arcsine_transform = TRUE, data_type = "MC",
-                             suffix_old = "beadNorm", suffix_new = "cleaned")
-{
-  if (!is(files, "character") & !is(files, "list")) {
-    stop("files must be a character vector or a list")
+clean_files_PQC <- function(
+    files,
+    channels_to_clean,
+    cores = 1,
+    plot = 20,
+    out_dir = ".",
+    name_dir = "Cleaned",
+    MAD = 6,
+    IT_limit = 0.6,
+    remove_zeros = TRUE,
+    arcsine_transform = TRUE,
+    data_type = "MC",
+    suffix_old = "compensated",
+    suffix_new = "cleaned"
+) {
+
+  # Check input files
+  if (
+    !is(files, "character") &&
+    !is(files, "list")
+  ) {
+    stop(
+      "files must be a character vector or a list.",
+      call. = FALSE
+    )
   }
+
   if (is(files, "list")) {
-    files <- unlist(files)
+    files <- unlist(
+      files,
+      use.names = FALSE
+    )
   }
-  if (any(!is(cores, "numeric") | cores < 1)) {
-    stop("cores must be a positive number")
+
+  if (
+    length(cores) != 1 ||
+    !is.numeric(cores) ||
+    cores < 1
+  ) {
+    stop(
+      "cores must be a positive number.",
+      call. = FALSE
+    )
   }
+
   if (!all(file.exists(files))) {
-    stop("incorrect file path, the fcs file does not exist")
+    stop(
+      "One or more FCS files do not exist.",
+      call. = FALSE
+    )
   }
+
+  if (!data_type %in% c("MC", "FC")) {
+    stop(
+      "data_type must be either 'MC' or 'FC'.",
+      call. = FALSE
+    )
+  }
+
+  if (!dir.exists(out_dir)) {
+    dir.create(
+      out_dir,
+      recursive = TRUE
+    )
+  }
+
+  # Function applied to each FCS file
+  clean_one_file <- function(file) {
+
+    message(
+      "Cleaning signal with PeacoQC: ",
+      basename(file)
+    )
+
+    ff <- flowCore::read.FCS(
+      file,
+      transformation = FALSE
+    )
+
+    channels_to_transform <- find_mass_ch(
+      ff,
+      value = FALSE
+    )
+
+    # Transform data for PeacoQC
+    if (arcsine_transform) {
+
+      if (data_type == "MC") {
+
+        ff_t <- flowCore::transform(
+          ff,
+          flowCore::transformList(
+            flowCore::colnames(ff)[channels_to_transform],
+            CytoNorm::cytofTransform
+          )
+        )
+
+      } else {
+
+        ff_t <- flowCore::transform(
+          ff,
+          flowCore::transformList(
+            flowCore::colnames(ff)[channels_to_transform],
+            flowCore::arcsinhTransform(
+              a = 0,
+              b = 1 / 150,
+              c = 0
+            )
+          )
+        )
+      }
+
+    } else {
+
+      ff_t <- ff
+    }
+
+    # Run PeacoQC
+    pqc <- PeacoQC::PeacoQC(
+      ff_t,
+      channels = channels_to_clean,
+      plot = plot,
+      output_directory = out_dir,
+      name_directory = name_dir,
+      MAD = MAD,
+      IT_limit = IT_limit,
+      remove_zeros = remove_zeros,
+      save_fcs = FALSE
+    )
+
+    # Define output path
+    input_name <- basename(file)
+
+    if (grepl(suffix_old, input_name, fixed = TRUE)) {
+
+      output_name <- sub(
+        suffix_old,
+        suffix_new,
+        input_name,
+        fixed = TRUE
+      )
+
+    } else {
+
+      output_name <- sub(
+        "\\.[Ff][Cc][Ss]$",
+        paste0("_", suffix_new, ".fcs"),
+        input_name
+      )
+    }
+
+    output_file <- file.path(
+      out_dir,
+      output_name
+    )
+
+    # Save original-scale good cells
+    flowCore::write.FCS(
+      ff[pqc$GoodCells, ],
+      filename = output_file
+    )
+
+    return(output_file)
+  }
+
+  # Run cleaning
   if (cores == 1) {
-    lapply(files, function(x) {
-      ff <- flowCore::read.FCS(x)
-      channels_to_transform <- find_mass_ch(ff, value = FALSE)
-      if (arcsine_transform) {
-        if (data_type == "MC") {
-          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
-                                                                  CytoNorm::cytofTransform))
-        }
-        else if (data_type == "FC") {
-          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
-                                                                  flowCore::arcsinhTransform(a = 0, b = 1/150,
-                                                                                             c = 0)))
-        }
-        else {
-          stop("specify data type MC or FC")
-        }
-      }
-      else {
-        ff_t <- ff
-      }
-      PQC <- PeacoQC::PeacoQC(ff_t, channels = channels_to_clean, plot = plot,
-                              output_directory = out_dir, name_directory = name_dir,
-                              MAD = MAD, IT_limit = IT_limit, remove_zeros = remove_zeros,
-                              save_fcs = FALSE, time_unit=10000)
-      flowCore::write.FCS(ff[PQC$GoodCells], file.path(out_dir, basename(sub(suffix_old, suffix_new, x))))
-    })
+
+    output_files <- lapply(
+      files,
+      clean_one_file
+    )
+
+  } else {
+
+    output_files <- BiocParallel::bplapply(
+      files,
+      clean_one_file,
+      BPPARAM = BiocParallel::SnowParam(
+        workers = cores
+      )
+    )
   }
-  else {
-    BiocParallel::bplapply(files, function(x) {
-      ff <- flowCore::read.FCS(x)
-      channels_to_transform <- find_mass_ch(ff, value = FALSE)
-      if (arcsine_transform) {
-        if (data_type == "MC") {
-          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
-                                                                  CytoNorm::cytofTransform))
-        }
-        else if (data_type == "FC") {
-          ff_t <- flowCore::transform(ff, flowCore::transformList(flowCore::colnames(ff)[channels_to_transform],
-                                                                  flowCore::arcsinhTransform(a = 0, b = 1/150,
-                                                                                             c = 0)))
-        }
-        else {
-          stop("specify data type MC or FC")
-        }
-      }
-      else {
-        ff_t <- ff
-      }
-      PQC <- PeacoQC::PeacoQC(ff_t, channels = channels_to_clean, plot = plot,
-                              output_directory = out_dir, name_directory = name_dir,
-                              MAD = MAD, IT_limit = IT_limit, remove_zeros = remove_zeros,
-                              save_fcs = FALSE, time_unit=50000)
-      flowCore::write.FCS(ff[PQC$GoodCells], file.path(out_dir, basename(sub(suffix_old, suffix_new, x))))
-    }, BPPARAM = BiocParallel::MulticoreParam(workers = cores))
-  }
+
+  return(
+    unlist(
+      output_files,
+      use.names = FALSE
+    )
+  )
 }
 
-.save_bead_clean <- function(file,
-                             to_plot = "All",
-                             clean_flow_rate = TRUE,
-                             clean_signal = TRUE,
-                             out_dir = getwd(),
-                             alpha = 0.01,
-                             data_type = "MC",
-                             channels_to_clean = NULL,
-                             Segment = 1000,
-                             arcsine_transform = TRUE,
-                             non_used_bead_ch = NULL,
-                             MaxPercCut = 0.5,
-                             UseOnlyWorstChannels = TRUE,
-                             AllowFlaggedRerun = TRUE,
-                             AlwaysClean = TRUE,
-                             ...){
-  # read fcs file
-  ff <- flowCore::read.FCS(filename = file,
-                           transformation = FALSE)
+.save_bead_clean <- function(
+    file,
+    to_plot = "All",
+    clean_flow_rate = TRUE,
+    clean_signal = TRUE,
+    out_dir = getwd(),
+    alpha = 0.01,
+    data_type = "MC",
+    channels_to_clean = NULL,
+    Segment = 1000,
+    arcsine_transform = TRUE,
+    non_used_bead_ch = NULL,
+    MaxPercCut = 0.5,
+    UseOnlyWorstChannels = TRUE,
+    AllowFlaggedRerun = TRUE,
+    AlwaysClean = TRUE,
+    ...
+) {
 
-  if(clean_flow_rate){
-    # clean flow rate
-    message("cleaning flowrate for ", basename(file))
-    ff <- .clean_flow_rate_ind(flow_frame = ff,
-                               out_dir = out_dir,
-                               to_plot = to_plot,
-                               data_type = data_type)
+  # Read FCS file
+  ff <- flowCore::read.FCS(
+    filename = file,
+    transformation = FALSE
+  )
 
+  # Clean flow rate
+  if (clean_flow_rate) {
+    message(
+      "Cleaning flow rate: ",
+      basename(file)
+    )
+
+    ff <- .clean_flow_rate_ind(
+      flow_frame = ff,
+      to_plot = to_plot,
+      out_dir = out_dir,
+      alpha = alpha,
+      data_type = data_type
+    )
   }
 
-  if(clean_signal){
-    # clean signal
-    message("cleaning signal for ", basename(file))
-    ff <- .clean_signal_ind(flow_frame = ff,
-                            to_plot = to_plot,
-                            out_dir = out_dir,
-                            Segment = Segment,
-                            arcsine_transform = arcsine_transform,
-                            data_type = data_type,
-                            non_used_bead_ch = non_used_bead_ch)
+  # Clean signal
+  if (clean_signal) {
+    message(
+      "Cleaning signal: ",
+      basename(file)
+    )
+
+    ff <- .clean_signal_ind(
+      flow_frame = ff,
+      channels_to_clean = channels_to_clean,
+      to_plot = to_plot,
+      Segment = Segment,
+      out_dir = out_dir,
+      arcsine_transform = arcsine_transform,
+      non_used_bead_ch = non_used_bead_ch,
+      MaxPercCut = MaxPercCut,
+      UseOnlyWorstChannels = UseOnlyWorstChannels,
+      AllowFlaggedRerun = AllowFlaggedRerun,
+      AlwaysClean = AlwaysClean,
+      data_type = data_type,
+      ...
+    )
   }
 
+  # Define output file
+  output_file <- file.path(
+    out_dir,
+    gsub(
+      "_compensated",
+      "_cleaned",
+      basename(file),
+      fixed = TRUE
+    )
+  )
 
+  # Write cleaned FCS file
+  flowCore::write.FCS(
+    ff,
+    filename = output_file
+  )
 
-  # Write FCS files
-  flowCore::write.FCS(ff,
-                      file = file.path(out_dir, gsub("_beadNorm","_cleaned",
-                                                     basename(file))))
+  return(output_file)
 }
 
 
@@ -457,72 +632,6 @@ clean_files_PQC <- function (files, channels_to_clean,
 }
 
 
-.clean_flow_rate_ind <- function(flow_frame, to_plot = TRUE,
-                                 out_dir = getwd(), alpha = 0.01,
-                                 data_type = "MC") {
-
-  if (data_type == "MC"){
-    time_division <- 100
-    timestep <- 0.01
-  }
-  else if (data_type == "FC") {
-    time_division <- 1
-    word <- which(grepl("TIMESTEP", names(flowCore::keyword(flowCore::flowSet(ff)[[1]])),
-                        ignore.case = TRUE))
-    timestep <- as.numeric(flowCore::keyword(flowCore::flowSet(ff)[[1]])[[word[1]]])
-  }
-  else{
-    stop("type of data MC or FC needs to be specified")
-  }
-
-  if (to_plot == "None") {
-    to_plot <- FALSE
-  }
-  else {
-    to_plot <- TRUE
-
-  }
-
-  flow_frame@exprs[, "Time"] <- flow_frame@exprs[, "Time"]/time_division
-
-
-  FlowRateData <- .flow_rate_bin_adapted(flow_frame,
-                                         timeCh = "Time",
-                                         timestep = timestep)
-
-  FlowRateQC <- .flow_rate_check_adapted(x = flow_frame,
-                                         FlowRateData = FlowRateData,
-                                         alpha = alpha,
-                                         use_decomp = TRUE)
-
-  if (to_plot == TRUE){
-
-    out_dir <- file.path(out_dir, "FlowRateCleaning")
-    if(!dir.exists(out_dir)){
-      dir.create(out_dir)
-    }
-
-    png(file.path(out_dir,
-                  gsub(".fcs", "_flowAI.png",
-                       basename(flow_frame@description$FILENAME),
-                       ignore.case = TRUE)),
-        width = 800,
-        height = 600)
-    if(data_type == "MC"){
-      FlowRateQC$res_fr_QC[,1] <- timestep
-    }
-    p <- .plot_flowrate(FlowRateQC, data_type = data_type)
-    print(p)
-    dev.off()
-  }
-
-  flow_frame_cl <- flow_frame[FlowRateQC$goodCellIDs,]
-  flow_frame_cl@exprs[,"Time"] <- flow_frame_cl@exprs[,"Time"]*time_division
-
-  return(flow_frame_cl)
-}
-
-
 #' Plots flow rate
 #'
 #' @description plots flow rate for .fcs files
@@ -602,19 +711,33 @@ clean_files_PQC <- function (files, channels_to_clean,
     ff_t <- flow_frame
   }
 
-  if (!is.null(channels_to_clean)){
+  if (!is.null(channels_to_clean)) {
 
-    ch_to_clean <- which(flowCore::colnames(flow_frame) %in% channels_to_clean)
+    ch_to_clean <- which(
+      flowCore::colnames(flow_frame) %in% channels_to_clean
+    )
 
-    if(!("TIME" %in% toupper(flowCore::colnames(flow_frame)[ch_to_clean]))){
-      ind_Time <- grep("TIME", toupper(flowCore::colnames(flow_frame)))
-      channels <- unique(sort(c(ch_to_clean, ind_Time)))
+    if (!("TIME" %in% toupper(
+      flowCore::colnames(flow_frame)[ch_to_clean]
+    ))) {
+
+      ind_time <- grep(
+        "TIME",
+        toupper(flowCore::colnames(flow_frame))
+      )
+
+      channels <- unique(
+        sort(c(ch_to_clean, ind_time))
+      )
+
+    } else {
+
+      channels <- ch_to_clean
     }
-
   }
   else {
 
-    if (!is.null(non_used_bead_ch)) {
+    if (is.null(non_used_bead_ch)) {
       non_bead_ch <- "140"
     }
     else {
@@ -637,13 +760,13 @@ clean_files_PQC <- function (files, channels_to_clean,
                                    Segment = Segment,
                                    MaxPercCut = MaxPercCut,
                                    Channels = channels,
-                                   FileID = gsub("_beadNorm", "_flowCutCleaned",
+                                   FileID = gsub("_compensated", "_flowCutCleaned",
                                                  basename(flow_frame@description$FILENAME)),
                                    Plot = to_plot,
                                    Directory = out_dir,
                                    UseOnlyWorstChannels = UseOnlyWorstChannels,
                                    AllowFlaggedRerun = AllowFlaggedRerun,
-                                   AlwaysClean = AlwaysClean)
+                                   AlwaysClean = AlwaysClean, ...)
 
   ff_t_clean <- cleaned_data$frame
 

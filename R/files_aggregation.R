@@ -9,6 +9,10 @@
 #' barcode_name: defines to which barcode each file belongs
 #' fcs_new_name: a name for the fcs file that will be given after deconvolution
 #' and aggregation.
+#' @param barcode_column Character string specifying the column in \code{md}
+#' containing the barcode identifiers.
+#' @param batch_column Character string specifying the column in \code{md}
+#' containing the batch identifiers.
 #' @param cores Number of cores to be used.
 #' @param channels_to_keep Character vector with channel names to be kept.
 #' Default NULL.
@@ -22,36 +26,27 @@
 #' @return List of the pathways to aggregated files.
 #'
 #' @examples
+#' fcs_files <- system.file(
+#'   "extdata",
+#'   paste0("Center", 1:4, "_batch1.fcs"),
+#'   package = "CytoQP"
+#' )
 #'
-#' # Set input directory
-#' debarcode_dir <- file.path(dir, "Debarcoded")
-
-#' # Define files for debarcoding
-#' files <- list.files(debarcode_dir,
-#'                     pattern = "_debarcoded.fcs$",
-#'                     full.names = TRUE, recursive = T)
+#' md <- data.frame(
+#'   barcode_name = "Center1",
+#'   batch = "batch1",
+#'   fcs_new_name = "sample_aggregated.fcs"
+#' )
 #'
-#' # Define out_dir for aggregated files
-#' aggregate_dir <- file.path(dir, "Aggregated")
-#'
-#' # Bring metadata
-#' md <- utils::read.csv(file.path(dir, "RawFiles", "meta_data.csv"))
-#'
-#' # Assign barcodes names
-#' md$barcode_name <- paste0(rownames(CATALYST::sample_key)[md$BARCODE])
-#'
-#' # Assign new sample names specifying patient id and its batch name
-#' md$fcs_new_name <- paste0(md$ID, "_", md$STIM, "_", md$BATCH, ".fcs")
-#'
-#' # Aggregate and deconvolute file names
-#' aggregate_files(fcs_files = files,
-#'                 md,
-#'                 barcode_column = "barcode_name",
-#'                 batch_column = "BATCH",
-#'                 cores = 1,
-#'
-#'                 out_dir = aggregate_dir,
-#'                 write_agg_file = TRUE)
+#' files_aggregated <- aggregate_files(
+#'   fcs_files = fcs_files,
+#'   md = md,
+#'   barcode_column = "barcode_name",
+#'   batch_column = "batch",
+#'   cores = 1,
+#'   write_agg_file = FALSE,
+#'   out_dir = file.path(tempdir(), "Aggregated")
+#' )
 #'
 #' @export
 aggregate_files <- function(fcs_files,
@@ -94,7 +89,7 @@ aggregate_files <- function(fcs_files,
 
     print(paste0("Creating ", md[[i, "fcs_new_name"]]))
 
-    outputFile = md[[i, "fcs_new_name"]]
+    outputFile <- md[[i, "fcs_new_name"]]
 
     .aggregate_ind(fcs_files = files_to_agg,
                    channels_to_keep = channels_to_keep,
@@ -111,7 +106,6 @@ aggregate_files <- function(fcs_files,
 
 
 .aggregate_ind <- function(fcs_files,
-                           cores = 1,
                            channels_to_keep = NULL,
                            outputFile = "aggregate.fcs",
                            maxcells = NULL,
@@ -126,8 +120,12 @@ aggregate_files <- function(fcs_files,
     f <- flowCore::read.FCS(fcs_files[i])
 
     if(!is.null(maxcells)){
-      c <- sample(seq_len(nrow(f)), min(nrow(f), maxcells))
-      f <- f[c,]
+      cell_idx <- sample(
+        seq_len(nrow(f)),
+        min(nrow(f), maxcells)
+      )
+
+      f <- f[cell_idx, ]
     }
 
     m <- matrix(rep(i, nrow(f)))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/clean_flow_rate_and_signal.R
 \name{clean_files_PQC}
 \alias{clean_files_PQC}
-\title{Clean signal with PeacoQC}
+\title{Clean Signal with PeacoQC}
 \usage{
 clean_files_PQC(
   files,
@@ -16,75 +16,81 @@ clean_files_PQC(
   remove_zeros = TRUE,
   arcsine_transform = TRUE,
   data_type = "MC",
-  suffix_old = "beadNorm",
+  suffix_old = "compensated",
   suffix_new = "cleaned"
 )
 }
 \arguments{
-\item{files}{Character vector or list with the paths of the raw files.}
+\item{files}{Character vector or list containing paths to FCS files.}
 
-\item{channels_to_clean}{Channels that need to be cleaned}
+\item{channels_to_clean}{Character vector specifying the channels used
+for PeacoQC signal cleaning.}
 
-\item{cores}{Number of cores to be used.}
+\item{cores}{Number of cores to use. Default is 1.}
 
-\item{plot}{As in PeacoQC. When PeacoQC removes more than the specified
-percentage, an overview plot will be made of all the selected channels and
-the deleted measurements. If set to TRUE, the PlotPeacoQC function is run to
-make an overview plot of the deleted measurements, even when nothing is
-removed. Default is set to 20. If an increasing or decreasing trend is found,
-a figure will also be made except if plot is set to FALSE.}
+\item{plot}{Passed to \code{PeacoQC::PeacoQC()}. Controls generation of
+diagnostic plots. Default is 20.}
 
-\item{out_dir}{As in PeacoQC. Directory where a new folder will be created
-that consists of the generated fcs files, plots and report. If set to NULL,
-nothing will be stored.The default folder is the working directory.}
+\item{out_dir}{Directory where cleaned FCS files and PeacoQC output are
+written. Default is the current working directory.}
 
-\item{name_dir}{As in PeacoQC. Name of folder that will be generated in
-\code{out_directory}.` The default is "PeacoQC_results".}
+\item{name_dir}{Name of the PeacoQC results directory.
+Default is \code{"Cleaned"}.}
 
-\item{MAD}{As in PeacoQC. The MAD parameter. Default is 6. If this is
-increased, the algorithm becomes less strict.}
+\item{MAD}{MAD threshold used by PeacoQC. Increasing this value makes
+the algorithm less strict. Default is 6.}
 
-\item{IT_limit}{As in PeacoQC. The IsolationTree parameter. Default is 0.55.
-If this is increased, the algorithm becomes less strict.}
+\item{IT_limit}{IsolationTree threshold used by PeacoQC. Increasing this
+value makes the algorithm less strict. Default is 0.6.}
 
-\item{remove_zeros}{If this is set to TRUE, the zero values will be removed
-before the peak detection step. They will not be indicated as 'bad' value.
-This is recommended when cleaning mass cytometry data. Default is FALSE.}
+\item{remove_zeros}{Logical indicating whether zero values should be removed
+before peak detection. Default is \code{TRUE}.}
 
-\item{arcsine_transform}{Logical, if the data should be transformed with
-arcsine transformation and cofactor 5, default is set to TRUE.
-Applies to signal cleaning.}
+\item{arcsine_transform}{Logical indicating whether the data should be
+transformed before PeacoQC analysis. Default is \code{TRUE}.}
 
-\item{data_type}{Character, if MC (mass cytometry) of FC (flow cytometry)
-data are analyzed.}
+\item{data_type}{Character specifying the cytometry data type:
+\code{"MC"} for mass cytometry or \code{"FC"} for flow cytometry.}
 
-\item{suffix_old}{Old suffix to replace with \code{suffix_new}`.}
+\item{suffix_old}{Character string to replace in input filenames.
+Default is \code{"compensated"}.}
 
-\item{suffix_new}{What to replace \code{suffix_old} with.}
+\item{suffix_new}{Character string used in cleaned output filenames.
+Default is \code{"cleaned"}.}
 }
 \value{
-Cleaned, untransformed flow frame if arcsine_transform argument
-set to TRUE, otherwise transformed flow frame is returned.
+A character vector containing the paths to the cleaned FCS files.
 }
 \description{
-Cleans the signal using PeacoQC package.
+Cleans unstable signal regions in cytometry data using PeacoQC.
+The selected channels are transformed before quality control when
+\code{arcsine_transform = TRUE}, while the original untransformed events
+corresponding to PeacoQC good cells are written to the output FCS files.
 }
 \examples{
-# Set and create the directory where cleaned fcs files will be saved
-clean_dir <- file.path(dir, "Cleaned")
+fcs_file <- system.file(
+  "extdata",
+  "Center1_batch1.fcs",
+  package = "CytoQP"
+)
 
-# Define which files will be cleaned
-files <- list.files(bead_norm_dir,
-                   ignore.case = TRUE,
-                   pattern = "_beadNorm.fcs$",
-                   full.names = TRUE)
+ff <- flowCore::read.FCS(
+  fcs_file,
+  transformation = FALSE
+)
 
+channels_to_clean <- find_mass_ch(
+  ff,
+  value = TRUE
+)
 
-# Clean files
-clean_files_PQC(files = files, cores = 1,
-               cores = 1, remove_zeros = TRUE,
-               channels_to_clean = channelsToClean,
-               arcsine_transform = TRUE,
-               data_type = "MC")
+files_clean <- clean_files_PQC(
+  files = fcs_file,
+  channels_to_clean = channels_to_clean,
+  cores = 1,
+  plot = FALSE,
+  data_type = "MC",
+  out_dir = file.path(tempdir(), "PeacoQC")
+)
 
 }

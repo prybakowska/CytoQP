@@ -102,31 +102,33 @@ Perform normalization using reference files. Takes advantage of
 CytoNorm package.
 }
 \examples{
-# Set input directory
-gate_dir <- file.path(dir, "Gated")
+fcs_files <- system.file(
+  "extdata",
+  paste0("Center", 1:4, "_batch1.fcs"),
+  package = "CytoQP"
+)
 
-# Define reference samples
-files_ref <- list.files(gate_dir,
-                        pattern = "*_gated.fcs$",
-                        full.names = TRUE,
-                        recursive = T)
+df <- data.frame(
+  file_paths = fcs_files,
+  batch_labels = paste0("Center", 1:4),
+  ref_ids = rep(TRUE, 4)
+)
 
-df <- data.frame("file_paths" = files_ref,
-                "batch_labels" = stringr::str_match(files_ref, "day[0-9]*")[,1],
-                "ref_ids" = grepl("REF", files_ref))
-
-
-model <- train_REF_model(df = df,
-                        markers_to_normalize = c("CD", "HLA", "IgD",
-                                                 "IL", "TN", "MCP", "MIP",
-                                                 "Gran", "IFNa"),
-                        arcsine_transform = TRUE,
-                        nQ = 2,
-                        limit = c(0,8),
-                        quantileValues = c(0.05, 0.95),
-                        goal = "mean",
-                        norm_with_clustering = FALSE,
-                        save_model = TRUE,
-                        clustering_markers = c("CD", "HLA", "IgD"))
+model <- train_REF_model(
+  df = df,
+  markers_to_normalize = c(
+    "CD",
+    "HLA",
+    "IgD"
+  ),
+  nQ = 2,
+  limit = c(0, 8),
+  quantileValues = c(0.05, 0.95),
+  goal = "mean",
+  to_plot = FALSE,
+  norm_with_clustering = FALSE,
+  save_model = FALSE,
+  out_dir = file.path(tempdir(), "CytoNormed")
+)
 
 }

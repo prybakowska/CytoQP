@@ -29,3 +29,32 @@ for AOF scores and AOF scaled scores.
 Calculates scaled AOF scores and sample quality score.
 Additionally plots heatmaps for both raw  aof scores and scaled aof scores.
 }
+\examples{
+aof_scores <- matrix(
+  c(
+    0.10, 0.20, 0.15,
+    0.12, 0.25, 0.18,
+    0.30, 0.15, 0.22
+  ),
+  nrow = 3,
+  byrow = TRUE
+)
+
+rownames(aof_scores) <- c(
+  "sample1.fcs",
+  "sample2.fcs",
+  "sample3.fcs"
+)
+
+colnames(aof_scores) <- c(
+  "CD3",
+  "CD4",
+  "CD8"
+)
+
+scores <- scaled_aof_score(
+  aof_scores = aof_scores,
+  out_dir = file.path(tempdir(), "Quality_Control")
+)
+
+}
