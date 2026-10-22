@@ -587,14 +587,14 @@ plot_spillover <- function(
 #'   input = compensation_file
 #' )
 #'
-#' files_compensated <- compensate_cytof(
+#' files_compensated <- compensation(
 #'   samples = fcs_files,
 #'   compensation = spillover_matrix,
 #'   output_dir = file.path(tempdir(), "Compensated_files")
 #' )
 #'
 #' @export
-compensate_cytof <- function(
+compensation <- function(
     samples,
     compensation,
     transformed = TRUE,
