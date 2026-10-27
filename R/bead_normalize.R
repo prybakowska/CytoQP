@@ -1,42 +1,44 @@
-#' Creates baseline file for bead normalization
+#' Create a baseline file for bead normalization
 #'
-#' @description Creates the reference flow frame for which mean beads
-#' values will be computed and used during the normalization.
+#' @description
+#' Creates a reference flow frame from multiple FCS files. Mean bead
+#' intensities from this reference are used for subsequent bead normalization.
 #'
-#' @param fcs_files Character, path to fcs files to be normalized.
-#' @param beads Character, as in CATALYST::normCytof, "dvs"
-#' (for bead masses 140, 151, 153 ,165, 175)
-#' or "beta" (for bead masses 139, 141, 159, 169, 175)
-#' or a numeric vector of masses. Default is set to "dvs".
-#' @param to_plot Logical, indicates if plots should be generated,
-#' default set to FALSE
-#' @param out_dir Character, pathway to where the plots should be saved,
-#' only if argument to_plot = TRUE, default is set to working directory.
-#' @param k The same as in CATALYST::normCytof, integer width of the
-#' median window used for bead smoothing (affects visualizations only).
-#' @param ncells number of cells to be aggregated per each file, defaults is
-#' set to 25000 per file.
-#' @param ... Additional arguments to pass to CATALYST::normCytof.
+#' @param fcs_files Character vector containing paths to the FCS files used
+#' to create the reference.
+#' @param beads Numeric vector specifying the bead masses used for
+#' normalization, as in \code{CATALYST::normCytof}. The V1 default
+#' \code{"dvs"} is retained; you can specify numeric masses explicitly
+#' (e.g. \code{c(89, 115, 140, 159, 175, 209)}).
+#' @param to_plot Logical indicating whether diagnostic plots should be
+#' generated. Default is \code{FALSE}.
+#' @param out_dir Character specifying the directory where plots should be
+#' saved when \code{to_plot = TRUE}. Default is the working directory.
+#' @param k Integer specifying the width of the median window used for bead
+#' smoothing, as in \code{CATALYST::normCytof}. Default is 80.
+#' @param ncells Number of cells sampled from each FCS file to construct the
+#' reference flow frame. Default is 25000 cells per file.
+#' @param ... Additional arguments passed to \code{CATALYST::normCytof}.
 #'
-#' @return Returns reference, aggregated flow frame.
+#' @return
+#' A \code{flowFrame} containing the aggregated reference cells used for
+#' bead normalization.
 #'
 #' @examples
-#' # set input directory (pathway to the files that are going to be normalized)
-#' raw_data_dir <- file.path(dir, "RawFiles")
+#' fcs_files <- system.file(
+#'   "extdata",
+#'   paste0("Center", 1:4, "_batch1.fcs"),
+#'   package = "CytoQP"
+#' )
 #'
-#' # set a directory where bead-normalized fcs files and plots will be saved
-#' bead_norm_dir <- file.path(dir, "BeadNorm")
-#'
-#' # define full pathway to the files that you want to normalize
-#' files <- list.files(raw_data_dir,
-#'                     pattern = ".FCS$",
-#'                     full.names = TRUE)
-#'
-#' # create baseline file to which all the files will be normalized
 #' set.seed(2)
-#' ref_sample <- baseline_file(fcs_files = files,
-#'                             beads = "dvs",
-#'                             out_dir = bead_norm_dir)
+#'
+#' ref_file <- baseline_file(
+#'   fcs_files = fcs_files,
+#'   beads = c(89, 115, 140, 159, 175, 209),
+#'   out_dir = file.path(tempdir(), "BeadNorm")
+#' )
+#'
 #' @export
 baseline_file <- function(fcs_files, beads = "dvs", to_plot = FALSE,
                           out_dir = getwd(), k = 80, ncells = 25000, ...){
@@ -86,84 +88,102 @@ baseline_file <- function(fcs_files, beads = "dvs", to_plot = FALSE,
 }
 
 
-#' Bead-based normalization
+#' Perform bead-based normalization
 #'
-#' @description Performs bead-based normalization using beads spiked in
-#' the sample. It is based on functions from CATALYST package.
+#' @description
+#' Performs bead-based normalization of FCS files using normalization beads
+#' spiked into the samples. Normalization is performed using
+#' \code{CATALYST::normCytof}. A reference flow frame generated with
+#' \code{baseline_file()} can be supplied to normalize multiple files to the
+#' same bead reference.
 #'
-#' @param files Character vector or list with the paths of the raw files.
-#' @param cores Number of cores to be used.Works only for not-Widows users.
-#' @param markers_to_keep Character vector, marker names to be kept after
-#' the normalization, can be full marker name e.g. "CD45" or "CD".
-#' If NULL (default) all markers will be normalized and kept in flowframe.
-#' Selection of the markers will reduce file volume and speedup the analysis.
-#' Non-mass channels like Time, Event_length, Gaussian parameters and in addition
-#' palladium barcoding channels are kept if non_mass_ch set to NULL.
-#' @param non_mass_channel Character vector, non-mass channels to keep for
-#' further analysis. Can be full channel name like Eu151Di or 151.
-#' By default "Time" and "event_length" will be always kept in the flow frame.
-#' @param beads Character, as in CATALYST::normCytof, "dvs"
-#' (for bead masses 140, 151, 153 ,165, 175)
-#' or "beta" (for bead masses 139, 141, 159, 169, 175)
-#' or a numeric vector of masses. Default is set to "dvs".
-#' @param norm_to_ref flow frame, created by baseline_file function to which
-#' input data will be normalized, default is set to NULL.
-#' @param to_plot Logical if to plot bead gate and bead normalization lines
-#' for each file.Defaults is set to TRUE.
-#' @param out_dir Character, pathway to where the bead normalized fcs files
-#' and plots should be saved, for plots only if argument to_plot = TRUE,
-#' default is set to file.path(getwd(), BeadNorm).
-#' @param k The same as in CATALYST::normCytof, integer width of the
-#' median window used for bead smoothing (affects visualizations only).
-#' @param remove_beads Logical, as in CATALYST::normCytof if beads should be
-#' removed from fcs files. Default set to TRUE. Note, should be set to FALSE if
-#' none of the channels is beads-specific.
-#' @param ... Additional arguments to pass to normCytof.
+#' @param files Character vector or list containing paths to the FCS files
+#' to be normalized.
+#' @param cores Number of cores used for processing. Default is 1.
+#' @param markers_to_keep Character vector specifying marker names or patterns
+#' to retain after normalization, for example \code{"CD45"} or \code{"CD"}.
+#' If \code{NULL}, all channels are retained.
+#' @param non_mass_channel Character vector specifying additional non-mass
+#' channels to retain. \code{Time} and event-length channels are retained
+#' automatically.
+#' @param beads Numeric vector specifying the bead masses used for
+#' normalization, as in \code{CATALYST::normCytof}. The V1 default
+#' \code{"dvs"} is retained; you can specify numeric masses explicitly
+#' (e.g. \code{c(89, 115, 140, 159, 175, 209)}).
+#' @param norm_to_ref Reference \code{flowFrame}, typically generated with
+#' \code{baseline_file()}, to which the input files are normalized.
+#' If \code{NULL}, each file is normalized to its own bead means.
+#' @param remove_beads Logical indicating whether normalization beads should
+#' be removed after normalization. Default is \code{TRUE}.
+#' @param to_plot Logical indicating whether bead-gating and normalization
+#' diagnostic plots should be generated. Default is \code{TRUE}.
+#' @param out_dir Character specifying the directory where normalized FCS
+#' files and diagnostic plots are saved. If \code{NULL}, a directory named
+#' \code{"BeadNorm"} is created in the current working directory.
+#' @param k Integer specifying the width of the median window used for bead
+#' smoothing, as in \code{CATALYST::normCytof}. Default is 80.
+#' @param ... Additional arguments passed to \code{CATALYST::normCytof}.
 #'
-#' @return Save bead-normalized fcs files and plots to out_dir.
+#' @return
+#' A list containing the results of the normalization for each input FCS file.
+#' Normalized FCS files are written to \code{out_dir}.
 #'
 #' @examples
-#' # set input directory (pathway to the files that are going to be normalized)
-#' raw_data_dir <- file.path(dir, "RawFiles")
+#' fcs_files <- system.file(
+#'   "extdata",
+#'   paste0("Center", 1:4, "_batch1.fcs"),
+#'   package = "CytoQP"
+#' )
 #'
-#' # set a directory where bead-normalized fcs files and plots will be saved
-#' bead_norm_dir <- file.path(dir, "BeadNorm")
-#'
-#' # define full pathway to the files that you want to normalize
-#' files <- list.files(raw_data_dir,
-#'                     pattern = ".FCS$",
-#'                     full.names = TRUE)
-#'
-#' # create baseline file to which all the files will be normalized
 #' set.seed(2)
-#' ref_sample <- baseline_file(fcs_files = files,
-#'                             beads = "dvs",
-#'                             out_dir = bead_norm_dir)
 #'
-#' # Normalize files
-#' bead_normalize(files, cores = 1,
-#'                out_dir = bead_norm_dir,
-#'                non_mass_channel = NULL,
-#'                norm_to_ref = ref_sample,
-#'                to_plot = TRUE,
-#'                remove_beads = TRUE,
-#'                k = 80,
-#'                markers_to_keep = c("CD", "HLA", "IgD", "TCR", "Ir",
-#'                                  "Viability","IL", "IFNa",
-#'                                    "TNF", "TGF", "MIP", "MCP", "Granz"))
+#' ref_file <- baseline_file(
+#'   fcs_files = fcs_files,
+#'   beads = c(89, 115, 140, 159, 175, 209),
+#'   out_dir = file.path(tempdir(), "BeadNorm")
+#' )
+#'
+#' files_beadnorm <- bead_normalize(
+#'   files = fcs_files,
+#'   beads = c(89, 115, 140, 159, 175, 209),
+#'   cores = 1,
+#'   non_mass_channel = NULL,
+#'   norm_to_ref = ref_file,
+#'   to_plot = TRUE,
+#'   remove_beads = TRUE,
+#'   k = 80,
+#'   out_dir = file.path(tempdir(), "BeadNorm"),
+#'   markers_to_keep = c(
+#'     "CD",
+#'     "HLA",
+#'     "IgD",
+#'     "TCR",
+#'     "Siglec",
+#'     "Ir",
+#'     "Viability",
+#'     "IL",
+#'     "IFNa",
+#'     "TNF",
+#'     "TGF",
+#'     "MIP",
+#'     "MCP",
+#'     "Granz"
+#'   )
+#' )
 #'
 #' @export
-bead_normalize <- function(files,
-                           cores = 1,
-                           markers_to_keep = NULL,
-                           non_mass_channel = NULL,
-                           beads = "dvs",
-                           norm_to_ref = NULL,
-                           remove_beads = TRUE,
-                           to_plot = TRUE,
-                           out_dir = NULL,
-                           k = 80,
-                           ...){
+bead_normalize <- function(
+    files,
+    cores = 1,
+    markers_to_keep = NULL,
+    non_mass_channel = NULL,
+    beads = "dvs",
+    norm_to_ref = NULL,
+    remove_beads = TRUE,
+    to_plot = TRUE,
+    out_dir = NULL,
+    k = 80,
+    ...) {
   # Check parameters
   if(!is(files, "character") & !is(files, "list")) {
     stop("files must be a character vector or a list")
@@ -196,14 +216,14 @@ bead_normalize <- function(files,
     BiocParallel::bplapply(files, function(x) {
       .save_bead_normalize(x,
                            markers_to_keep,
-                           non_mass_channel,
                            beads,
+                           non_mass_channel,
                            norm_to_ref,
                            remove_beads,
                            to_plot,
                            out_dir,
                            k)},
-      BPPARAM = MulticoreParam(workers = cores))
+      BPPARAM = BiocParallel::MulticoreParam(workers = cores))
   }
 
 }
@@ -270,8 +290,7 @@ bead_normalize <- function(files,
                       ignore.case = TRUE, value = FALSE)
 
     if(is.null(non_mass_channel)){
-      non_mass_ch <- grep("Time|length|Ce140|151|153|165|175|Center|Offset|Width|
-                        |Residual|Pd",
+      non_mass_ch <- grep("Time|length|Ce140|151|153|165|175|Center|Offset|Width|Residual|Pd",
                           flowCore::colnames(flow_frame),
                           ignore.case = TRUE, value = FALSE)
 
@@ -303,7 +322,7 @@ bead_normalize <- function(files,
                                   remove_beads = remove_beads,
                                   norm_to = norm_to_ref,
                                   k = k,
-                                  plot = TRUE,
+                                  plot = to_plot,
                                   transform = FALSE,
                                   ...)
 
@@ -337,5 +356,3 @@ bead_normalize <- function(files,
 
   return(f)
 }
-
-
