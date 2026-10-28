@@ -161,7 +161,7 @@ clean_files <- function(files,
           ...
         )
       },
-      BPPARAM = BiocParallel::SnowParam(
+      BPPARAM = BiocParallel::MulticoreParam(
         workers = cores
       )
     )
@@ -418,7 +418,7 @@ clean_files_PQC <- function(
     output_files <- BiocParallel::bplapply(
       files,
       clean_one_file,
-      BPPARAM = BiocParallel::SnowParam(
+      BPPARAM = BiocParallel::MulticoreParam(
         workers = cores
       )
     )
