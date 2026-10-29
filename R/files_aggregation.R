@@ -9,9 +9,12 @@
 #' barcode_name: defines to which barcode each file belongs
 #' fcs_new_name: a name for the fcs file that will be given after deconvolution
 #' and aggregation.
+#' @param barcode_column Character, barcode column name in md.
+#' @param batch_column Character, batch column name in md.
 #' @param cores Number of cores to be used.
 #' @param channels_to_keep Character vector with channel names to be kept.
-#' Default NULL.
+#' Default NULL. The acquisition channels Time, Event_length, Center,
+#' Width, Residual, Offset and Amplitude are retained when present.
 #' @param maxcells Numeric, maximum cells to randomly aggregate from each file,
 #' default is set to NULL, which means that all the cells will be aggregated.
 #' @param write_agg_file Logical, if the fcs files should be saved, if TRUE
@@ -19,39 +22,30 @@
 #' @param out_dir Character, pathway to where the files should be saved,
 #' if NULL (default) files will be saved to file.path(getwd(), Aggregated).
 #'
-#' @return List of the pathways to aggregated files.
+#' @return Character vector of paths to the aggregated FCS files.
 #'
 #' @examples
-#'
-#' # Set input directory
-#' debarcode_dir <- file.path(dir, "Debarcoded")
-
-#' # Define files for debarcoding
-#' files <- list.files(debarcode_dir,
-#'                     pattern = "_debarcoded.fcs$",
-#'                     full.names = TRUE, recursive = T)
-#'
-#' # Define out_dir for aggregated files
-#' aggregate_dir <- file.path(dir, "Aggregated")
-#'
-#' # Bring metadata
-#' md <- utils::read.csv(file.path(dir, "RawFiles", "meta_data.csv"))
-#'
-#' # Assign barcodes names
-#' md$barcode_name <- paste0(rownames(CATALYST::sample_key)[md$BARCODE])
-#'
-#' # Assign new sample names specifying patient id and its batch name
-#' md$fcs_new_name <- paste0(md$ID, "_", md$STIM, "_", md$BATCH, ".fcs")
-#'
-#' # Aggregate and deconvolute file names
-#' aggregate_files(fcs_files = files,
-#'                 md,
-#'                 barcode_column = "barcode_name",
-#'                 batch_column = "BATCH",
-#'                 cores = 1,
-#'
-#'                 out_dir = aggregate_dir,
-#'                 write_agg_file = TRUE)
+#' # Aggregate the example FCS file into a new file.
+#' fcs_files <- system.file(
+#'   "extdata", "Center1_batch1.fcs", package = "CytoQP"
+#' )
+#' md <- data.frame(
+#'   barcode_name = "Center1",
+#'   batch = "batch1",
+#'   fcs_new_name = "sample_aggregated.fcs"
+#' )
+#' set.seed(2)
+#' files_aggregated <- aggregate_files(
+#'   fcs_files = fcs_files,
+#'   md = md,
+#'   barcode_column = "barcode_name",
+#'   batch_column = "batch",
+#'   cores = 1,
+#'   maxcells = 500,
+#'   write_agg_file = TRUE,
+#'   out_dir = file.path(tempdir(), "Aggregated")
+#' )
+#' stopifnot(all(file.exists(files_aggregated)))
 #'
 #' @export
 aggregate_files <- function(fcs_files,
@@ -92,6 +86,11 @@ aggregate_files <- function(fcs_files,
                               fcs_files, value = TRUE),
                          value = TRUE)
 
+    if (!length(files_to_agg)) {
+      stop("No files match barcode '", patterns[1],
+           "' in batch '", patterns[2], "'")
+    }
+
     print(paste0("Creating ", md[[i, "fcs_new_name"]]))
 
     outputFile = md[[i, "fcs_new_name"]]
@@ -118,12 +117,20 @@ aggregate_files <- function(fcs_files,
                            write_agg_file = FALSE,
                            out_dir = getwd()) {
   nFiles <- length(fcs_files)
+  if (!nFiles) stop("No files supplied for aggregation")
   flowFrame <- NULL
+
+  acquisition_channels <- c(
+    "Time", "Event_length", "Center", "Width",
+    "Residual", "Offset", "Amplitude"
+  )
 
   if(!dir.exists(out_dir))(dir.create(out_dir))
 
   for (i in seq_len(nFiles)) {
-    f <- flowCore::read.FCS(fcs_files[i])
+    f <- flowCore::read.FCS(
+      fcs_files[i], transformation = FALSE, truncate_max_range = FALSE
+    )
 
     if(!is.null(maxcells)){
       c <- sample(seq_len(nrow(f)), min(nrow(f), maxcells))
@@ -141,7 +148,10 @@ aggregate_files <- function(fcs_files,
     if(is.null(channels_to_keep)){
       f <- flowCore::fr_append_cols(f, m)
     } else {
-      f <- flowCore::fr_append_cols(f[ , channels_to_keep], m)
+      # Also keep acquisition channels without changing the user-specified order.
+      keep <- unique(c(channels_to_keep,
+                       intersect(acquisition_channels, colnames(f))))
+      f <- flowCore::fr_append_cols(f[ , keep], m)
     }
     if (is.null(flowFrame)) {
       flowFrame <- f
@@ -151,6 +161,9 @@ aggregate_files <- function(fcs_files,
                                              outputFile)
     }
     else {
+      if (!identical(colnames(f), colnames(flowFrame))) {
+        stop("Channel names/order differ between aliquots: ", basename(fcs_files[i]))
+      }
       f@exprs[, "Time"] <- f@exprs[, "Time"] + max(flowFrame@exprs[,"Time"]) + 1000
       flowCore::exprs(flowFrame) <- rbind(flowCore::exprs(flowFrame),
                                           flowCore::exprs(f))
@@ -177,5 +190,4 @@ aggregate_files <- function(fcs_files,
 
   return(file.path(out_dir, outputFile))
 
-  # return(flowFrame)
 }
