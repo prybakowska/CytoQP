@@ -183,6 +183,9 @@ clean_files <- function(files,
 #' @param remove_zeros If this is set to TRUE, the zero values will be removed
 #' before the peak detection step. They will not be indicated as 'bad' value.
 #' This is recommended when cleaning mass cytometry data. Default is FALSE.
+#' @param max_bins As in PeacoQC. The maximum number of bins that can be used
+#' in the cleaning process. If this value is lowered, larger bins will be made.
+#' Default is 500.
 #' @param arcsine_transform Logical, if the data should be transformed with
 #' arcsine transformation and cofactor 5, default is set to TRUE.
 #' Applies to signal cleaning.
@@ -218,7 +221,7 @@ clean_files <- function(files,
 #' @export
 clean_files_PQC <- function (files, channels_to_clean,
                              cores = 1, plot = 20, out_dir = ".", name_dir = "Cleaned",
-                             MAD=6, IT_limit=0.6, remove_zeros=TRUE,
+                             MAD=6, IT_limit=0.6, remove_zeros=TRUE, max_bins=500,
                              arcsine_transform = TRUE, data_type = "MC",
                              suffix_old = "beadNorm", suffix_new = "cleaned")
 {
@@ -285,7 +288,8 @@ clean_files_PQC <- function (files, channels_to_clean,
       }
       PQC <- PeacoQC::PeacoQC(ff_t, channels = channels_to_clean, plot = plot,
                               output_directory = out_dir, name_directory = name_dir,
-                              MAD = MAD, IT_limit = IT_limit, remove_zeros = remove_zeros,
+                              MAD = MAD, IT_limit = IT_limit,
+                              max_bins = max_bins, remove_zeros = remove_zeros,
                               save_fcs = FALSE, time_unit=50000)
       flowCore::write.FCS(ff[PQC$GoodCells], file.path(out_dir, basename(sub(suffix_old, suffix_new, x))))
     }, BPPARAM = BiocParallel::MulticoreParam(workers = cores))

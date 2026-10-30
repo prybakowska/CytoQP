@@ -14,6 +14,7 @@ clean_files_PQC(
   MAD = 6,
   IT_limit = 0.6,
   remove_zeros = TRUE,
+  max_bins = 500,
   arcsine_transform = TRUE,
   data_type = "MC",
   suffix_old = "beadNorm",
@@ -50,6 +51,10 @@ If this is increased, the algorithm becomes less strict.}
 \item{remove_zeros}{If this is set to TRUE, the zero values will be removed
 before the peak detection step. They will not be indicated as 'bad' value.
 This is recommended when cleaning mass cytometry data. Default is FALSE.}
+
+\item{max_bins}{As in PeacoQC. The maximum number of bins that can be used
+in the cleaning process. If this value is lowered, larger bins will be made.
+Default is 500.}
 
 \item{arcsine_transform}{Logical, if the data should be transformed with
 arcsine transformation and cofactor 5, default is set to TRUE.
