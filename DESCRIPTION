@@ -1,8 +1,9 @@
 Package: CytoQP
 Title: Cytometry data quality control and cleaninig
-Version: 1.0.8
+Version: 1.1.0
 Date: 2026-10-30
 Authors@R: c(
+    person("Mehmet Serdar", "Koca", , "serdar.koca@genyo.es", role = "aut"),
     person("Paulina", "Rybakowska", , "paulina.rybakowska@genyo.es", role = c("aut", "cre")),
     person("Sofie", "Van Gassen", , "sofie.vangassen@ugent.be", role = "aut"),
     person("Jordi", "Martorell Marugán", , "jordi.martorell@genyo.es", role = "aut"),
@@ -20,7 +21,7 @@ Description: CytoQP (Quality Pipeline) offers a pipeline to pre-process
     batch effect and extract features like cell frequencies and median
     signal intensities.
 License: GPL (>= 2)
-Imports: 
+Imports:
     BiocParallel,
     CATALYST,
     CytoNorm,
@@ -37,18 +38,18 @@ Imports:
     grid,
     gridExtra,
     magrittr,
+    methods,
     pheatmap,
     PeacoQC,
     RColorBrewer,
     S4Vectors,
     stats,
     stringr,
-    SummarizedExperiment,
     utils,
     uwot
 Remotes:
-  saeyslab/CytoNorm,
-  ismmshimc/cytutils
+    saeyslab/CytoNorm,
+    ismmshimc/cytutils
 Depends: 
     R (>= 4.0)
 Encoding: UTF-8
