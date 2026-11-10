@@ -59,6 +59,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Set input directory
 #' gate_dir <- file.path(dir, "Gated")
 #'
@@ -86,6 +87,7 @@
 #'                         save_model = TRUE,
 #'                         clustering_markers = c("CD", "HLA", "IgD"))
 #'
+#' }
 train_REF_model <- function(df,
                             markers_to_normalize = NULL,
                             transformList = NULL,
@@ -252,6 +254,7 @@ train_REF_model <- function(df,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Set input directory
 #' gate_dir <- file.path(dir, "Gated")
 #'
@@ -283,6 +286,7 @@ train_REF_model <- function(df,
 #' normalize_REF(model = model, df = df, arcsine_transform = TRUE,
 #'               norm_with_clustering = FALSE)
 #'
+#' }
 normalize_REF <- function(model,
                           df,
                           arcsine_transform = TRUE,
