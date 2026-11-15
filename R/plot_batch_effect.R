@@ -20,6 +20,8 @@
 #' transform function, see flowCore::transformList(), if different transformation
 #' than arcsine is needed. Only if arcsine_transform is FALSE. If NULL and
 #' arcsine_transform = FALSE no transformation will be applied.
+#' @param batch_labels Character vector containing
+#'   the batch label for each input FCS file.
 #' @param n_neighbors The size of local neighborhood in UMAP analysis, default
 #' set to 15, as in uwot::umap().
 #' It is recommended to set it to the number of files in each batch.
