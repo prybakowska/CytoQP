@@ -235,7 +235,6 @@ plot_batch <- function(files_before_norm,
 #' frequency and MSI. It is imputing 0 values when NAs are detected in MSI for
 #' clusters and metaclusters.
 #'
-#' @param file_list List, pathway to the files before and after normalization
 #' @param nCells Numeric, number of cells to be cluster per each file,
 #' default is set to 50 000.
 #' @param phenotyping_markers Character vector, marker names to be used for clustering,
