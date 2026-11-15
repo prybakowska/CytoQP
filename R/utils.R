@@ -29,8 +29,10 @@ find_mass_ch <- function(flow_frame,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
 #' basename(files_before_norm))
+#' }
 test_match_order <- function(x,y) {
 
   if (isTRUE(all.equal(x,y))) print('Files are ordered')
