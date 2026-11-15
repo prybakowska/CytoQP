@@ -52,8 +52,10 @@ split_big_flowFrames <- function(flow_frame,
   }
 }
 
-
-#'Calculates breaks for flow frame splitting
+#' Calculate breaks for flow frame splitting
+#'
+#' @param event_per_flow_frame Number of events per segment.
+#' @param total_events Total number of events.
 .make_breaks <- function(event_per_flow_frame, total_events){
   breaks <- .split_flowFrames(seq_len(total_events),
                               event_per_flow_frame)
@@ -64,10 +66,12 @@ split_big_flowFrames <- function(flow_frame,
 }
 
 
-#'Calculates beginning and end of each flow frame.
+#' Calculate beginning and end of each flow frame
 #'Code from Annelies Emmaneel (2021). PeacoQC:
 #'Peak-based selection of high quality cytometry data. R package
 #'version 1.4.0.
+#' @param vec Vector of event indices.
+#' @param seg.length Number of events per segment.
 .split_flowFrames <- function(vec, seg.length) {
   starts=seq(1, length(vec), by=seg.length)
   ends  = starts + seg.length - 1

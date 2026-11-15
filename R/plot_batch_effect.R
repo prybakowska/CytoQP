@@ -930,7 +930,7 @@ prepare_data_for_plotting <- function(frequency_msi_list,
 #' @param shape As in ggplot2, defines by which variable the shapes are plotted.
 #' @param color As in ggplot2, defines by which variable the borderd of the
 #' points are colored.
-#' @param split_by_batch Logical, if TRUE (defult) the plots are split
+#' @param split_by_normalization Logical, if TRUE (defult) the plots are split
 #' (facet_wrap) by normalization.
 #' @param fill_legend_name Character, specifies the name of the legend for fill.
 #' @param color_legend_name Character, specifies the name of the legend for fill.

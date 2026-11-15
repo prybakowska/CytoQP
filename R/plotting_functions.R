@@ -29,6 +29,9 @@
 #' @param files_before_norm Character vector or list with the paths of the raw files.
 #' @param files_after_norm Character vector or list with the paths of the normalized files.
 #' @param batch_pattern Character, batch pattern to be match in the fcs file name
+#' @param batch_labels Character vector containing batch labels
+#'   corresponding to each input FCS file.
+#' @param plot_name Character, name used for the output PDF file.
 #' @param uncommon_prefix Character vector or string, uncommon prefix in
 #' the basename of the fcs files. The file names need to match, so uncommon prefix
 #' needs to be removed. If NULL (default) prefix like
