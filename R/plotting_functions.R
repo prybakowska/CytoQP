@@ -57,6 +57,7 @@
 #' @return Save the pdf with plots to out_dir.
 #'
 #' @examples
+#' \dontrun{
 #' # Define files for visualization
 #' # Before normalization
 #' raw_data_dir <- file.path(dir, "RawFiles")
@@ -87,6 +88,7 @@
 #'                      manual_colors = c("darkorchid4", "darkorange", "darkgreen"),
 #'                      out_dir = bead_norm_dir)
 #'
+#' }
 #' @import ggplot2
 #' @importFrom magrittr %>%
 #'
@@ -307,6 +309,7 @@ plot_marker_quantiles <- function(files_before_norm,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' plot_2D_scatter_plots(fcs_files = fcs_files,
 #'                       markers_to_plot = c("CD", "HLA"),
 #'                       y_marker = "CD45$",
@@ -314,6 +317,7 @@ plot_marker_quantiles <- function(files_before_norm,
 #'                       out_put_name = "marker_plots.png")
 #'
 #'
+#' }
 plot_2D_scatter_plots <- function(fcs_files,
                                   markers_to_plot,
                                   y_marker,
@@ -353,7 +357,7 @@ plot_2D_scatter_plots <- function(fcs_files,
 
   n_plots <- length(norm_markers) - 1
   grDevices::png(file.path(out_dir, paste0(out_put_name)),
-      width = n_plots * 300, height = length(fcs_files) * 300)
+                 width = n_plots * 300, height = length(fcs_files) * 300)
   graphics::layout(matrix(1:(length(fcs_files) * n_plots), ncol = n_plots, byrow = TRUE))
 
   for(file in fcs_files){
