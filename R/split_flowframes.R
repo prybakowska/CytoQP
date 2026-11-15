@@ -13,11 +13,13 @@
 #' @return Save splitted fcs files in out_dir.
 #'
 #' @examples
+#' \dontrun{
 #' ff <- flowCore::read.FCS(list.files(path = raw_data_dir,
 #' pattern = ".FCS", full.names = TRUE)[1])
 #'
 #' split_big_flowFrames(flow_frame = ff, event_per_flow_frame = 100000)
 #'
+#' }
 #' @export
 split_big_flowFrames <- function(flow_frame,
                                  event_per_flow_frame = 500000,
