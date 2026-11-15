@@ -37,6 +37,7 @@
 #' scores for further analysis, files are saved in out_dir.
 #'
 #' @examples
+#' \dontrun{
 #' # Set input directory
 #' clean_dir <- file.path(dir, "Cleaned")
 #'
@@ -56,6 +57,7 @@
 #'                   nClus = 10,
 #'                   sd = 3)
 #'
+#' }
 #' @importFrom flowCore transformList
 #' @import ggplot2
 #'
@@ -129,7 +131,7 @@ file_quality_check <- function(fcs_files,
   }
 
   final_score <- file_outlier_detection(scores = scores, out_dir = out_dir,
-                                       sd = sd)
+                                        sd = sd)
   return(final_score)
 }
 
@@ -201,7 +203,7 @@ fsom_aof <- function(fcs_files,
   if(!is.null(markers_to_score)){
     markers <- FlowSOM::GetMarkers(ff_tmp, flowCore::colnames(ff_tmp))
     channels_to_score <- grep(paste(markers_to_score,
-                                   collapse = ("|")), markers, value = TRUE)
+                                    collapse = ("|")), markers, value = TRUE)
 
     vector <- c(phenotyping_channels, channels_to_score)
     channels_to_score <- vector[!duplicated(names(vector))]
@@ -221,7 +223,7 @@ fsom_aof <- function(fcs_files,
                                      CytoNorm::cytofTransform)
   } else {
     if(is.null(transform_list)){
-      warrning("parameter transform_list was no defined, channels will not be tranformed")
+      warning("parameter transform_list was no defined, channels will not be tranformed")
     }
     trans <- transform_list
   }
@@ -341,7 +343,7 @@ aof_scoring <- function(fcs_files,
   if(!is.null(markers_to_score)){
     markers <- FlowSOM::GetMarkers(ff_tmp, flowCore::colnames(ff_tmp))
     chanels_to_score <- grep(paste(markers_to_score,
-                                          collapse = ("|")), markers, value = TRUE)
+                                   collapse = ("|")), markers, value = TRUE)
 
     vector <- c(phenotyping_channels, chanels_to_score)
     phenotyping_channels <- vector[!duplicated(names(vector))]
@@ -534,7 +536,7 @@ file_outlier_detection <- function(scores, out_dir = NULL, sd) {
     scale_x_discrete(breaks = df_scores$file_names[df_scores$quality == "bad"])
 
   if(scores_median + sd * scores_MAD <= max_pctgs){
-    p + geom_hline(yintercept = scores_median + sd * scores_MAD,
+    p <- p + geom_hline(yintercept = scores_median + sd * scores_MAD,
                    linetype = "dashed", color = "darkgreen", size = 1)
   }
 
