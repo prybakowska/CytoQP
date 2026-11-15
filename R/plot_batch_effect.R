@@ -27,6 +27,7 @@
 #' @import ggplot2
 #'
 #' @examples
+#' \dontrun{
 #' # Define files before normalization
 #' gate_dir <- file.path(dir, "Gated")
 #' files_before_norm <- list.files(gate_dir,
@@ -55,6 +56,7 @@
 #'            clustering_markers = c("CD", "IgD", "HLA"),
 #'            manual_colors = c("darkorchid4", "darkorange", "chartreuse4"))
 #'
+#' }
 #' @export
 #'
 #' @return save plots for batch effect in the out_dir
@@ -264,6 +266,7 @@ plot_batch <- function(files_before_norm,
 #' @import ggplot2
 #'
 #' @examples
+#' \dontrun{
 #'
 #' # Define files before normalization
 #' gate_dir <- file.path(dir, "Gated")
@@ -298,6 +301,7 @@ plot_batch <- function(files_before_norm,
 #'                                     save_matrix = TRUE,
 #'                                     seed = 343)
 #'
+#' }
 #' @return list of matrices that contain calculation for
 #' cl_pctgs (cluster percentages), mcl_pctgs (metaclusters percentages),
 #' cl_msi (cluster MSIs for selected markers), mcl_msi (metaclusters MSI
@@ -455,18 +459,18 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
 
     if(impute_0_values){
       cl_msi <- apply(cl_msi, 2,
-                          function(x){
-                            missing <- which(is.na(x))
-                            x[missing] <- 0
-                            x
-                          })
+                      function(x){
+                        missing <- which(is.na(x))
+                        x[missing] <- 0
+                        x
+                      })
 
       mcl_msi <- apply(mcl_msi, 2,
-                           function(x){
-                             missing <- which(is.na(x))
-                             x[missing] <- 0
-                             x
-                           })
+                       function(x){
+                         missing <- which(is.na(x))
+                         x[missing] <- 0
+                         x
+                       })
     }
 
 
@@ -537,6 +541,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
 #' @import ggplot2
 #'
 #' @examples
+#' \dontrun{
 #'
 #' # Define files before normalization
 #' gate_dir <- file.path(getwd(), "Gated")
@@ -583,6 +588,7 @@ extract_pctgs_msi_per_flowsom <- function(files_before_norm,
 #'
 #' }
 #'
+#' }
 #' @return matrix that contain calculation for
 #' cl_pctgs (cluster percentages), mcl_pctgs (metaclusters percentages),
 #' cl_msi (cluster MSIs for selected markers), mcl_msi (metaclusters MSI
@@ -795,6 +801,7 @@ extract_pctgs_msi_per_flowsom <- function(files,
 #' @return data frame for plotting
 #'
 #' @examples
+#' \dontrun{
 #' # Define files before normalization
 #' gate_dir <- file.path(dir, "Gated")
 #' files_before_norm <- list.files(gate_dir,
@@ -857,6 +864,7 @@ extract_pctgs_msi_per_flowsom <- function(files,
 #'                width = 22,
 #'                height = 14, dpi = 300)
 #'
+#' }
 #' @export
 prepare_data_for_plotting <- function(frequency_msi_list,
                                       matrix_type,
@@ -933,6 +941,7 @@ prepare_data_for_plotting <- function(frequency_msi_list,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Define files before normalization
 #' gate_dir <- file.path(dir, "Gated")
 #' files_before_norm <- list.files(gate_dir,
@@ -995,6 +1004,7 @@ prepare_data_for_plotting <- function(frequency_msi_list,
 #'                width = 22,
 #'                height = 14, dpi = 300)
 #'
+#' }
 plot_batch_using_freq_msi <- function(df_plot,
                                       fill = NULL,
                                       shape = NULL,
@@ -1052,8 +1062,10 @@ plot_batch_using_freq_msi <- function(df_plot,
 #' @import ggplot2
 #'
 #' @examples
+#' \dontrun{
 #' gg_a <- grid_arrange_common_legend(plot_lists = plots, nrow = 2, ncol = 2,
 #' position = "right")
+#' }
 grid_arrange_common_legend <- function(plot_lists,
                                        nrow = 1,
                                        ncol = length(plot_lists),
