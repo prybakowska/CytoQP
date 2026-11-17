@@ -25,10 +25,15 @@ barcode_name: defines to which barcode each file belongs
 fcs_new_name: a name for the fcs file that will be given after deconvolution
 and aggregation.}
 
+\item{barcode_column}{Character, barcode column name in md.}
+
+\item{batch_column}{Character, batch column name in md.}
+
 \item{cores}{Number of cores to be used.}
 
 \item{channels_to_keep}{Character vector with channel names to be kept.
-Default NULL.}
+Default NULL. The acquisition channels Time, Event_length, Center,
+Width, Residual, Offset and Amplitude are retained when present.}
 
 \item{maxcells}{Numeric, maximum cells to randomly aggregate from each file,
 default is set to NULL, which means that all the cells will be aggregated.}
@@ -40,41 +45,22 @@ files will be saved in out_dir. Default set to TRUE.}
 if NULL (default) files will be saved to file.path(getwd(), Aggregated).}
 }
 \value{
-List of the pathways to aggregated files.
+Character vector of paths to the aggregated FCS files.
 }
 \description{
 Performs aggregation of debarcoded files, assigning user defined
 name to each file.
 }
 \examples{
-
-# Set input directory
-debarcode_dir <- file.path(dir, "Debarcoded")
-# Define files for debarcoding
-files <- list.files(debarcode_dir,
-                    pattern = "_debarcoded.fcs$",
-                    full.names = TRUE, recursive = T)
-
-# Define out_dir for aggregated files
-aggregate_dir <- file.path(dir, "Aggregated")
-
-# Bring metadata
-md <- utils::read.csv(file.path(dir, "RawFiles", "meta_data.csv"))
-
-# Assign barcodes names
-md$barcode_name <- paste0(rownames(CATALYST::sample_key)[md$BARCODE])
-
-# Assign new sample names specifying patient id and its batch name
-md$fcs_new_name <- paste0(md$ID, "_", md$STIM, "_", md$BATCH, ".fcs")
-
-# Aggregate and deconvolute file names
-aggregate_files(fcs_files = files,
-                md,
-                barcode_column = "barcode_name",
-                batch_column = "BATCH",
-                cores = 1,
-
-                out_dir = aggregate_dir,
-                write_agg_file = TRUE)
+\dontrun{
+paths <- list.files("path/to/debarcoded", pattern = "\\\\.fcs$",
+                    full.names = TRUE, ignore.case = TRUE)
+md <- data.frame(barcode_name = "Sample1", batch = "BATCH1",
+                 fcs_new_name = "patient01.fcs")
+output <- aggregate_files(fcs_files = paths, md = md,
+                          barcode_column = "barcode_name",
+                          batch_column = "batch", cores = 1,
+                          out_dir = file.path(tempdir(), "Aggregated"))
+}
 
 }

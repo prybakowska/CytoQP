@@ -87,8 +87,6 @@ saved. If TRUE (default) files will be saved in out_dir.}
 
 \item{impute_0_values}{Logical, if 0 values should be imputed for MSI values
 if NAs are present.}
-
-\item{file_list}{List, pathway to the files before and after normalization}
 }
 \value{
 list of matrices that contain calculation for
@@ -115,6 +113,7 @@ frequency and MSI. It is imputing 0 values when NAs are detected in MSI for
 clusters and metaclusters.
 }
 \examples{
+\dontrun{
 
 # Define files before normalization
 gate_dir <- file.path(dir, "Gated")
@@ -149,6 +148,8 @@ mx <- extract_pctgs_msi_per_flowsom(files_after_norm = files_after_norm,
                                     save_matrix = TRUE,
                                     seed = 343)
 
+}
+\dontrun{
 
 # Define files before normalization
 gate_dir <- file.path(getwd(), "Gated")
@@ -195,4 +196,5 @@ results[[name]] <- mx
 
 }
 
+}
 }

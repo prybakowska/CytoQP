@@ -7,32 +7,39 @@
 plotspillmat(
   input,
   choosen_channels = NULL,
-  transformation = T,
+  transformation = TRUE,
   isotope_list = NULL,
   savespillmat = NULL,
   ...
 )
 }
 \arguments{
-\item{input}{Matrix, dataframe or FCS file path.}
+\item{input}{A numeric spillover matrix, data.frame, or compensation-bead
+FCS file path. Matrices must contain proportions (diagonal near 1).}
 
-\item{choosen_channels}{You can select channels using character vector which you used in experiment (e.g. c("Cd110Di","In115Di", "Pr141Di")).}
+\item{choosen_channels}{Optional character vector of mass channels.}
 
-\item{transformation}{Default is TRUE. If you want to use transformed data, it fixes automatically according to arcsinh.}
+\item{transformation}{V1 parameter: when FALSE, inverse CytoNorm
+transformation is applied to compensation-bead data before estimation.
+Default TRUE.}
 
-\item{isotope_list}{If you have isotope which is not including in CATALYST isotope list, you can assign but it fixes automatically.}
+\item{isotope_list}{Optional isotope list retained for V1 compatibility.}
+
+\item{savespillmat}{Optional CSV path to save the estimated spillover matrix
+(as proportions) when the input is an FCS file.}
+
+\item{...}{Optional plot parameters such as custom_colors and title.}
 }
 \value{
-returns ggplot object
+A ggplot object.
 }
 \description{
-Creates Spillover matrix and plots.
+Creates a spillover matrix from single-stained bead FCS data and plots it,
+or plots an existing spillover matrix. This is the original CytoQP V1 entry
+point, with all original parameters retained.
 }
 \examples{
-plt <- plotspillmat("231115_CompBeads_Aq1_4C_01.FCS", choosen_channels = c("Cd110Di","In115Di", "Pr141Di",
-                                                                           "Nd142Di", "Nd143Di", "Nd144Di",
-                                                                           "Nd145Di", "Nd146Di", "Dy164Di",
-                                                                           "Er167Di", "Er168Di", "Yb172Di"))
-ggsave(plt, "Spillover matrix")
-
+m <- matrix(c(1, 0.01, 0.02, 0.01, 1, 0.03, 0.02, 0.03, 1),
+            nrow = 3, dimnames = list(c("A", "B", "C"), c("A", "B", "C")))
+plotspillmat(m)
 }

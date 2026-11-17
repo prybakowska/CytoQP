@@ -32,7 +32,7 @@ transformed, thus transformed flow frame should be used if needed.
 Default TRUE.}
 
 \item{save_gated_flow_frame}{Logical, if gated flow frame should be saved.
-Only cells falling into intact cell region will be saved. Default set to FALSE.}
+Default NULL (no file written); set TRUE to save gated cells.}
 
 \item{suffix}{Character, suffix placed in the name of saved fcs file, only
 if save_gated_flow_frame = TRUE. Default is "_singlets_gated".}
@@ -52,34 +52,9 @@ Detects outliers in the selected channel(s) using MAD
 (mean absolute deviation).
 }
 \examples{
-#' # Set input directory
-aggregate_dir <- file.path(dir, "Aggregated")
-
-# List files for gating
-files <- list.files(path = aggregate_dir,
-                    pattern = ".fcs$",
-                    full.names = TRUE)
-
-# Create directory to store plot
-gate_dir <- file.path(getwd(), "Gated")
-if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-
-# Gate the files and plot the gating strategy for each file
-n_plots <- 1
-png(file.path(gate_dir, paste0("gating.png")),
-    width = n_plots * 300, height = length(files) * 300)
-layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-
-for (file in files){
-
- ff <- flowCore::read.FCS(filename = file,
-                          transformation = FALSE)
-
- ff <- gate_singlet_cells(flow_frame = ff,
-                          channels = "Event_length",
-                         file_name = basename(file), save_gated_flow_frame = TRUE)
+\dontrun{
+ff <- flowCore::read.FCS("path/to/sample.fcs", transformation = FALSE)
+gated <- gate_singlet_cells(flow_frame = ff, channels = "Event_length", save_gated_flow_frame = FALSE)
 }
-
-dev.off()
 
 }

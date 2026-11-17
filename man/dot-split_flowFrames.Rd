@@ -2,15 +2,20 @@
 % Please edit documentation in R/split_flowframes.R
 \name{.split_flowFrames}
 \alias{.split_flowFrames}
-\title{Calculates beginning and end of each flow frame.
+\title{Calculate beginning and end of each flow frame
 Code from Annelies Emmaneel (2021). PeacoQC:
 Peak-based selection of high quality cytometry data. R package
 version 1.4.0.}
 \usage{
 .split_flowFrames(vec, seg.length)
 }
+\arguments{
+\item{vec}{Vector of event indices.}
+
+\item{seg.length}{Number of events per segment.}
+}
 \description{
-Calculates beginning and end of each flow frame.
+Calculate beginning and end of each flow frame
 Code from Annelies Emmaneel (2021). PeacoQC:
 Peak-based selection of high quality cytometry data. R package
 version 1.4.0.

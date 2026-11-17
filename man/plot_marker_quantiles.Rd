@@ -27,6 +27,9 @@ plot_marker_quantiles(
 
 \item{batch_pattern}{Character, batch pattern to be match in the fcs file name}
 
+\item{batch_labels}{Character vector containing batch labels
+corresponding to each input FCS file.}
+
 \item{remove_beads}{Logical, if beads needs to be removed. This needs to be
 set to TRUE if files contain beads e.g before beads normalization,
 default is set to TRUE. For the visualization purpose the beads will be
@@ -48,6 +51,8 @@ arcsine transformation and cofactor 5.}
 \item{markers_to_plot}{character vector, marker names to be plotted, can be
 full marker name e.g. "CD45" or "CD" if all CD-markers needs to be plotted}
 
+\item{plot_name}{Character, name used for the output PDF file.}
+
 \item{manual_colors}{character, vector of the colors to be used,
 the number of colors needs to be equal to the length of batch_pattern}
 
@@ -67,6 +72,7 @@ Calculates quantiles (0.01, 0.25, 0.5, 0.75, 0.99) for
 selected markers and plots them as diagnostic plots.
 }
 \examples{
+\dontrun{
 # Define files for visualization
 # Before normalization
 raw_data_dir <- file.path(dir, "RawFiles")
@@ -97,4 +103,5 @@ plot_marker_quantiles(files_after_norm = files_a,
                      manual_colors = c("darkorchid4", "darkorange", "darkgreen"),
                      out_dir = bead_norm_dir)
 
+}
 }

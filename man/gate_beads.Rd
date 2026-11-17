@@ -37,13 +37,27 @@ if NULL (default) files will be saved to file.path(getwd(), Gated).}
 \item{suffix}{Character, suffix placed in the name of saved fcs file, only
 if save_gated_flow_frame = TRUE.Defult is "_intact_gated".}
 
-\item{DNA1Threshold}{Threshold for the DNA1 gate for the bead gating}
+\item{DNA1Threshold}{Upper cutoff for transformed Ir191Di (DNA1).
+Events at or below this threshold can be retained.}
 
-\item{TCRThreshold}{Threshold for the TCR gate for the bead gating}
+\item{TCRThreshold}{Upper cutoff for transformed Ce140Di (TCR).
+Events at or below this threshold can be retained.}
+
+\item{...}{Additional arguments passed to the function.}
 }
 \value{
 An untransformed flow frame with non-bead events only
 }
 \description{
-Performs gating of beads using a fixed cutoff.
+Retains events at or below both supplied cutoffs. On the
+scatter/density figure, retained events keep flowDensity's density colors
+and excluded events are overlaid in black. The same selection is returned
+and optionally saved.
+}
+\examples{
+\dontrun{
+ff <- flowCore::read.FCS("path/to/sample.fcs", transformation = FALSE)
+gated <- gate_beads(flow_frame = ff, DNA1Threshold = 15, TCRThreshold = 6, save_gated_flow_frame = FALSE)
+}
+
 }

@@ -40,8 +40,6 @@ if save_gated_flow_frame = TRUE. Default is "_singlets_gated".}
 if NULL (default) files will be saved to file.path(getwd(), Gated).}
 
 \item{...}{Additional arguments to pass to flowDensity::plotDens().}
-
-\item{n_mad}{Numeric, number of MADs to detect outliers.Default set to 2.}
 }
 \value{
 An untransformed flow frame with singlets only
@@ -51,35 +49,9 @@ Detects outliers in the selected channel(s) using MAD
 (mean absolute deviation).
 }
 \examples{
-#' # Set input directory
-aggregate_dir <- file.path(dir, "Aggregated")
-
-# List files for gating
-files <- list.files(path = aggregate_dir,
-                    pattern = ".fcs$",
-                    full.names = TRUE)
-
-# Create directory to store plot
-gate_dir <- file.path(getwd(), "Gated")
-if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-
-# Gate the files and plot the gating strategy for each file
-n_plots <- 1
-png(file.path(gate_dir, paste0("gating.png")),
-    width = n_plots * 300, height = length(files) * 300)
-layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-
-for (file in files){
-
- ff <- flowCore::read.FCS(filename = file,
-                          transformation = FALSE)
-
- ff <- gate_singlet_cells_XTPro(flow_frame = ff,
-                                channels = "Event_length",
-                                file_name = basename(file),
-                                save_gated_flow_frame = TRUE)
+\dontrun{
+ff <- flowCore::read.FCS("path/to/sample.fcs", transformation = FALSE)
+gated <- gate_singlet_cells_XTPro(flow_frame = ff, channels = "Event_length", save_gated_flow_frame = FALSE)
 }
-
-dev.off()
 
 }

@@ -47,6 +47,7 @@ normalized fcs files
 Normalize the data
 }
 \examples{
+\dontrun{
 # Set input directory
 gate_dir <- file.path(dir, "Gated")
 
@@ -78,4 +79,5 @@ model <- train_REF_model(df = df,
 normalize_REF(model = model, df = df, arcsine_transform = TRUE,
               norm_with_clustering = FALSE)
 
+}
 }

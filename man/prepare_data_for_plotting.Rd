@@ -33,6 +33,7 @@ per clusters and metaclusters obtained from extract_pctgs_msi_per_flowsom functi
 For the MSI it is taking the MSI > 1.
 }
 \examples{
+\dontrun{
 # Define files before normalization
 gate_dir <- file.path(dir, "Gated")
 files_before_norm <- list.files(gate_dir,
@@ -95,4 +96,5 @@ ggplot2::ggsave(filename ="batch_effect_frequency_MSI.png",
                width = 22,
                height = 14, dpi = 300)
 
+}
 }

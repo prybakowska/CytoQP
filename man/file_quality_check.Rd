@@ -64,6 +64,7 @@ Next, based on Quality scores, it detects outliers across all the files,
 regarding the batch.
 }
 \examples{
+\dontrun{
 # Set input directory
 clean_dir <- file.path(dir, "Cleaned")
 
@@ -83,4 +84,5 @@ file_quality_check(fcs_files = files,
                   nClus = 10,
                   sd = 3)
 
+}
 }

@@ -63,33 +63,9 @@ Performs gating of intact cells using flowDensity package and
 deGate function.
 }
 \examples{
-# Set input directory
-aggregate_dir <- file.path(dir, "Aggregated")
-
-# List files for gating
-files <- list.files(path = aggregate_dir,
-                    pattern = ".fcs$",
-                    full.names = TRUE)
-
-# Create directory to store plot
-gate_dir <- file.path(getwd(), "Gated")
-if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-
-# Gate the files and plot the gating strategy for each file
-n_plots <- 1
-png(file.path(gate_dir, paste0("gating.png")),
-    width = n_plots * 300, height = length(files) * 300)
-layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-
-for (file in files){
-
- ff <- flowCore::read.FCS(filename = file,
-                          transformation = FALSE)
-
- ff <- gate_intact_cells(flow_frame = ff,
-                         file_name = basename(file), save_gated_flow_frame = TRUE)
+\dontrun{
+ff <- flowCore::read.FCS("path/to/sample.fcs", transformation = FALSE)
+gated <- gate_intact_cells(flow_frame = ff, save_gated_flow_frame = FALSE)
 }
-
-dev.off()
 
 }

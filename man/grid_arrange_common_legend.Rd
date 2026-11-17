@@ -27,6 +27,8 @@ combained ggplot
 Plot listed plots with one common legend
 }
 \examples{
+\dontrun{
 gg_a <- grid_arrange_common_legend(plot_lists = plots, nrow = 2, ncol = 2,
 position = "right")
+}
 }

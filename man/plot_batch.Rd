@@ -24,6 +24,9 @@ plot_batch(
 
 \item{files_after_norm}{Character, full path to the normalized fcs_files.}
 
+\item{batch_labels}{Character vector containing
+the batch label for each input FCS file.}
+
 \item{batch_pattern}{Character, batch pattern to be match in the fcs file name.}
 
 \item{cores}{Number of cores to be used}
@@ -59,6 +62,7 @@ save plots for batch effect in the out_dir
 Plots batch effect using UMAP and clustering markers
 }
 \examples{
+\dontrun{
 # Define files before normalization
 gate_dir <- file.path(dir, "Gated")
 files_before_norm <- list.files(gate_dir,
@@ -87,4 +91,5 @@ plot_batch(files_before_norm = files_before_norm,
            clustering_markers = c("CD", "IgD", "HLA"),
            manual_colors = c("darkorchid4", "darkorange", "chartreuse4"))
 
+}
 }

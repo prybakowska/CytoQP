@@ -1,6 +1,6 @@
 Package: CytoQP
 Title: Cytometry data quality control and cleaninig
-Version: 1.1.8
+Version: 1.1.9
 Date: 2026-10-30
 Authors@R: c(
     person("Mehmet Serdar", "Koca", , "serdar.koca@genyo.es", role = "aut"),
@@ -60,3 +60,7 @@ URL: https://github.com/prybakowska/CytoQP
 BugReports: https://github.com/prybakowska/CytoQP/issues
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

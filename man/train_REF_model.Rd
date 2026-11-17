@@ -102,6 +102,7 @@ Perform normalization using reference files. Takes advantage of
 CytoNorm package.
 }
 \examples{
+\dontrun{
 # Set input directory
 gate_dir <- file.path(dir, "Gated")
 
@@ -129,4 +130,5 @@ model <- train_REF_model(df = df,
                         save_model = TRUE,
                         clustering_markers = c("CD", "HLA", "IgD"))
 
+}
 }

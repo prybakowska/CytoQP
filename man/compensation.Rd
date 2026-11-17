@@ -8,7 +8,7 @@ compensation(
   samples_input,
   compensation_input,
   choosen_channels = NULL,
-  transformation = T,
+  transformation = TRUE,
   isotope_list = NULL,
   out_dir = NULL,
   suffix_old = "cleaned",
@@ -17,27 +17,42 @@ compensation(
 )
 }
 \arguments{
-\item{samples_input}{Flowframe, character vector with the paths of fcs files.}
+\item{samples_input}{A flowFrame or character vector/list of FCS paths.}
 
-\item{compensation_input}{Matrix, dataframe or FCS file path.}
+\item{compensation_input}{A spillover matrix/data.frame of proportions, or
+compensation-bead FCS file path.}
 
-\item{choosen_channels}{You can select channels using character vector which you used in experiment (e.g. c("Cd110Di","In115Di", "Pr141Di")).}
+\item{choosen_channels}{Optional channels used for bead-based estimation.}
 
-\item{transformation}{Default is TRUE. If you want to use transformed data, it fixes automatically according to arcsinh.(It is only for flowframe variable not fcs files.)}
+\item{transformation}{Original V1 behavior: when FALSE for flowFrame input,
+applies inverse CytoNorm transformation before compensation. Default TRUE.}
 
-\item{isotope_list}{If you have isotope which is not including in CATALYST isotope list, you can assign but it fixes automatically.}
+\item{isotope_list}{Optional named isotope-to-mass mapping.}
+
+\item{out_dir}{Directory for saved FCS files. NULL creates Compensated_files.}
+
+\item{suffix_old}{Substring replaced in source filenames. Default "cleaned".}
+
+\item{suffix_new}{Replacement substring. Default "compensated".}
+
+\item{...}{Original V1 argument retained; unused additional arguments
+produce a warning instead of being silently discarded.}
 }
 \value{
-returns ggplot object
+For flowFrame input returns a compensated flowFrame. For FCS paths,
+writes compensated files and returns invisibly NULL, as in V1.
 }
 \description{
-Compensates the data using CATALYST package.
+Compensates CyTOF data using CATALYST. This is the original CytoQP V1
+function and argument interface. V2 fixes validation, file output handling,
+and isotope detection without renaming public arguments or changing defaults.
 }
 \examples{
-samples <- list.files("./", pattern = ".fcs", full.names = T)
-compensation(samples, "231115_CompBeads_Aq1_4C_01.FCS", choosen_channels = c("Cd110Di","In115Di", "Pr141Di",
-                                                                             "Nd142Di", "Nd143Di", "Nd144Di",
-                                                                             "Nd145Di", "Nd146Di", "Dy164Di",
-                                                                             "Er167Di", "Er168Di", "Yb172Di"))
-
+\dontrun{
+compensation(
+  samples_input = c("sample_cleaned.fcs"),
+  compensation_input = "Compensation_beads.fcs",
+  out_dir = "Compensated_files"
+)
+}
 }

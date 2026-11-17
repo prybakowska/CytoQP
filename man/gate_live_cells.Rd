@@ -31,11 +31,11 @@ the file name stored in keyword FIL will be used,}
 \item{tinypeak_removal_viability}{Numeric from 0-1, as in deGate to exclude/include
 tiny peaks in the tail of the density distribution curve for both viability channel}
 
-\item{alpha_viability}{Numeric, 0-1, as in deGate specify the significance of change
-in the slope of viability channel}
+\item{alpha_viability}{Numeric, significance threshold for detecting
+changes in the viability channel density curve. Default is 0.1.}
 
-\item{tinypeak_removal_Iridium}{The same as tinypeak_removal_viability but for
-the head and tail of the density distribution curve in Iridium channel}
+\item{tinypeak_removal_Iridium}{Numeric between 0 and 1, controls
+tiny peak removal in the Iridium density curve. Default is 0.8.}
 
 \item{alpha_Iridium}{The same as in alpha_viability but for the Iridium}
 
@@ -60,36 +60,9 @@ An untransformed flow frame with live cells only
 Performs gating of live cells using flowDensity::deGate
 }
 \examples{
-
-#' Set input directory
-aggregate_dir <- file.path(dir, "Aggregated")
-
-# List files for gating
-files <- list.files(path = aggregate_dir,
-                    pattern = ".fcs$",
-                    full.names = TRUE)
-
-# Create directory to store plot
-gate_dir <- file.path(getwd(), "Gated")
-if(!dir.exists(gate_dir)){dir.create(gate_dir)}
-
-# Gate the files and plot the gating strategy for each file
-n_plots <- 1
-png(file.path(gate_dir, paste0("gating.png")),
-width = n_plots * 300,
-height = length(files) * 300)
-layout(matrix(1:(length(files) * n_plots), ncol = n_plots, byrow = TRUE))
-
-for (file in files){
-
- ff <- flowCore::read.FCS(filename = file,
-                          transformation = FALSE)
-
- ff <- gate_live_cells(flow_frame = ff,
-                       viability_channel = "Pt195Di", save_gated_flow_frame = TRUE,
-                       file_name = basename(file))
+\dontrun{
+ff <- flowCore::read.FCS("path/to/sample.fcs", transformation = FALSE)
+gated <- gate_live_cells(flow_frame = ff, viability_channel = "Pt195Di", save_gated_flow_frame = FALSE)
 }
-
-dev.off()
 
 }

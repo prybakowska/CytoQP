@@ -18,6 +18,8 @@ warrning if he files are not in order
 Tests the order of the files
 }
 \examples{
+\dontrun{
 test_match_order(x = basename(gsub("Norm_","",files_after_norm)),
 basename(files_before_norm))
+}
 }

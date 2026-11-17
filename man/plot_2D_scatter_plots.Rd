@@ -33,6 +33,7 @@ Save plots in out_dir.
 Plots biaxial plots
 }
 \examples{
+\dontrun{
 plot_2D_scatter_plots(fcs_files = fcs_files,
                       markers_to_plot = c("CD", "HLA"),
                       y_marker = "CD45$",
@@ -40,4 +41,5 @@ plot_2D_scatter_plots(fcs_files = fcs_files,
                       out_put_name = "marker_plots.png")
 
 
+}
 }

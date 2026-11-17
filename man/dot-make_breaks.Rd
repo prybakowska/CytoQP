@@ -2,10 +2,15 @@
 % Please edit documentation in R/split_flowframes.R
 \name{.make_breaks}
 \alias{.make_breaks}
-\title{Calculates breaks for flow frame splitting}
+\title{Calculate breaks for flow frame splitting}
 \usage{
 .make_breaks(event_per_flow_frame, total_events)
 }
+\arguments{
+\item{event_per_flow_frame}{Number of events per segment.}
+
+\item{total_events}{Total number of events.}
+}
 \description{
-Calculates breaks for flow frame splitting
+Calculate breaks for flow frame splitting
 }
