@@ -58,56 +58,13 @@ The flow-rate quality control implementation also includes functions adapted fro
 
 ## Installation
 
-### 1. Install CRAN dependencies
-
-```r
-install.packages(c(
-  "devtools",
-  "dplyr",
-  "ggplot2",
-  "ggpubr",
-  "gridExtra",
-  "magrittr",
-  "pheatmap",
-  "RColorBrewer",
-  "stringr",
-  "uwot"
-))
-```
-
-### 2. Install Bioconductor dependencies
-
-```r
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
-}
-
-BiocManager::install(c(
-  "BiocParallel",
-  "CATALYST",
-  "flowCore",
-  "flowCut",
-  "flowDensity",
-  "FlowSOM",
-  "PeacoQC",
-  "S4Vectors"
-))
-```
-
-### 3. Install GitHub dependencies
-
-```r
-devtools::install_github("saeyslab/CytoNorm")
-devtools::install_github("ismmshimc/cytutils")
-```
-
-### 4. Install CytoQP
+### 1. Install CytoQP
 
 ```r
 devtools::install_github("prybakowska/CytoQP")
 ```
 
-### 5. Load CytoQP
+### 2. Load CytoQP
 
 ```r
 library(CytoQP)
